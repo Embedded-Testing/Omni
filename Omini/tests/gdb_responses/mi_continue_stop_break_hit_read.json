@@ -8,7 +8,7 @@
     {
         "type": "console",
         "message": null,
-        "payload": "Breakpoint 1, main () at src/GPIO_integration_test.cpp:23\n",
+        "payload": "Breakpoint 1, main () at src/MySourceFile.cpp:23\n",
         "stream": "stdout"
     },
     {
@@ -28,8 +28,8 @@
                 "addr": "0x08000a72",
                 "func": "main",
                 "args": [],
-                "file": "src/GPIO_integration_test.cpp",
-                "fullname": "/home/erick/Desktop/EITF/embedded-integration-test-framework/work_dir/Integration_Tests/GPIO_integration_tests/src/GPIO_integration_test.cpp",
+                "file": "src/MySourceFile.cpp",
+                "fullname": "/home/erick/Desktop/EITF/embedded-integration-test-framework/work_dir/Integration_Tests/GPIO_integration_tests/src/MySourceFile.cpp",
                 "line": "23",
                 "arch": "armv7e-m"
             },

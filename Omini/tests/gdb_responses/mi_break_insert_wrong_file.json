@@ -3,7 +3,7 @@
         "type": "result",
         "message": "error",
         "payload": {
-            "msg": "No source file named ./GPIO_integration_test.cpp."
+            "msg": "No source file named ./MyBadSourceFile.cpp."
         },
         "token": null,
         "stream": "stdout"

@@ -28,13 +28,27 @@ import json
 import re
 from .source_utility import *
 import os
+import linecache
 
 
 class GdbResponseError(Exception):
+    def __init__(self, message, folder_path="", malformed_response=[], malformed_file_name="") -> None:
+        if (len(folder_path) != 0 and len(malformed_response) != 0 and malformed_file_name != ""):
+            message = message + "Gdb response saved in {malformed_file_path}"
+            malformed_msg_file_path = os.path.join(
+                folder_path, malformed_file_name)
+            save_as_json(malformed_response, malformed_msg_file_path)
+        else:
+            super().__init__(message)
+
+
+class GdbBreakpointNotStopped(Exception):
     pass
+
 
 class GdbConnectionError(Exception):
     pass
+
 
 class GdbFlashError(Exception):
     pass
@@ -47,12 +61,15 @@ def save_as_json(response, file):
 
 
 class gdb:
+    ROBOT_LIBRARY_SCOPE = 'GLOBAL'
 
     def __init__(self, gdb_path='/usr/bin/arm-none-eabi-gdb'):
         self.server = ""
         self.connected_to_server = False
         self.elf_loaded = False
         self.working_dir = ""
+        self.logfile_path = ""
+        self.logfile_dir = ""
         self.__is_gdb_installed()
         self.gdb_controller = GdbController(
             command=[gdb_path, '--interpreter=mi3'])
@@ -84,7 +101,8 @@ class gdb:
         if ("received signal SIGINT, Interrupt" in r):
             return
         else:
-            raise GdbResponseError
+            raise GdbResponseError("Unexpected GDB response in pause",
+                                   self.logfile_dir, response_list, "malformed_pause.json")
 
     def __is_gdb_installed(self) -> bool:
         """Check if GDB (GNU Debugger) is installed on the system.
@@ -125,7 +143,8 @@ class gdb:
             raise FileNotFoundError(response["payload"]["msg"])
         else:
             raise GdbResponseError(
-                'Gdb Response Error. Gdb response: '+json.dumps(response))
+                "Unexpected GDB response in load_elf_file.", self.logfile_dir,
+                response, "malformed_load_elf_file.json")
 
     def __is_not_found_error(self, response):
         return "No such file or directory" in response["payload"]["msg"]
@@ -139,7 +158,7 @@ class gdb:
                 self.connected_to_server = True
             else:
                 raise GdbResponseError(
-                    'Gdb Response Error. Gdb response:'+json.dumps(rsp))
+                    'Unexpected GDB response in connect.', self.logfile_dir, rsp, "malformed_connect.json")
         except GdbTimeoutError:
             raise ConnectionError("Timeout connecting to "+ip+":"+port)
         return
@@ -180,7 +199,9 @@ class gdb:
         rsp = response_list[0]
         if (rsp["type"] != "result" or rsp["message"] != "running"):
             raise GdbResponseError(
-                "-exec-continue command failed: malformed response")
+                "Unexpected GDB response in continue_execution",
+                self.logfile_dir,
+                response_list, "malformed_continue_execution.json")
 
     def flash(self):
         self.__verify_server_connection()
@@ -188,11 +209,15 @@ class gdb:
         response_list = self.gdb_controller.write("-target-download")
         for r in response_list:
             if (("download" in r["payload"]) == False):
-                raise GdbResponseError
+                raise GdbResponseError("Unexpected GDB response in flash.",
+                                       self.logfile_dir,
+                                       response_list,
+                                       "malformed_flash.json")
 
     def __verify_server_connection(self):
         if (self.connected_to_server == False):
-            raise ConnectionError("Not connected to server")
+            raise ConnectionError("GDBclient is not connected to any server." +
+                                  "Please connect to a GDBserver or OpenOCD for proper functioning.")
 
     def __verify_if_elf_loaded(self):
         if (self.elf_loaded == False):
@@ -219,7 +244,7 @@ class gdb:
             if (isinstance(r["payload"], str) and "target halted due to debug-request" in r["payload"]):
                 return
         raise GdbResponseError(
-            "monitor reset halt command failed: malformed response")
+            "Unexpected GDB response in reset_halt", self.logfile_dir, response_list, "malformed_reset_halt.json")
 
     def get_program_state(self):
         self.__verify_server_connection()
@@ -229,7 +254,9 @@ class gdb:
         elif (self.__is_program_stopped(response_list)):
             return "stopped"
         else:
-            raise GdbResponseError
+            raise GdbResponseError(
+                "Unexpected GDB response in get_program_state", self.logfile_dir,
+                response_list, "malformed_get_program_state.json")
 
     def __is_program_running(self, response_list):
         running_msg = response_list[1]["payload"]
@@ -239,25 +266,39 @@ class gdb:
         stoped_msg = response_list[2]["payload"]
         return "Program stopped" in stoped_msg
 
-    def insert_breakpoint(self, source_file, line_number=-1, break_type="", tag=""):
+    def insert_breakpoint(self, source_file_path, line_number=-1, break_type="", tag=""):
+        self.__verify_source_file_path(source_file_path)
+        source_file = os.path.basename(source_file_path)
         line_number = self.__seek_line_number_from_src_file(
-            source_file, tag, line_number)
+            source_file_path, tag, line_number)
         bp_cmd = self.__build_bp_cmd(source_file, line_number, break_type)
         response_list = self.gdb_controller.write(bp_cmd)
         self.__verify_bp_cmd_response(response_list)
         return
 
-    def __seek_line_number_from_src_file(self, source_file, tag="", line_number=-1):
+    def __verify_source_file_path(self, source_file_path):
+        if (not os.path.isfile(source_file_path)):
+            raise FileNotFoundError(
+                f"""The specified source file path '{source_file_path}' does not exist or is not a file. Please provide 
+                a valid path to the source file where you want to set the breakpoint.""")
+
+    def __seek_line_number_from_src_file(self, source_file_path, tag="", line_number=-1):
         if (tag != "" and line_number != -1):
-            raise ValueError(
-                "Invalid arguments. line_number and tag cannot be defined at the same time")
+            self.__verify_line_and_tag(source_file_path, line_number, tag)
+            return line_number
         elif (tag != "" and line_number == -1):
-            return line_of_test_tag(tag, self.working_dir+'/'+source_file)
+            return line_of_test_tag(tag, source_file_path)
         elif (tag == "" and line_number != -1):
             return line_number
         else:
             raise ValueError(
-                "Invalid arguments. line_number or tag must be defined")
+                "Invalid arguments. line_number or tag or both must be defined")
+
+    def __verify_line_and_tag(self, source_file_path, line_number, tag):
+        target_line = linecache.getline(source_file_path, line_number)
+        if (not (tag in target_line)):
+            raise ValueError(
+                f"Invalid line or tag value. Line {line_number} does not contain \"{tag}\".")
 
     def __verify_bp_cmd_response(self, response_list):
         if (len(response_list) == 2):
@@ -265,15 +306,21 @@ class gdb:
         elif ((len(response_list) == 1)):
             result_msg = response_list[0]
             self.__verify_result_msg(result_msg)
-            raise GdbResponseError("malformed result_msg")
         else:
-            raise GdbResponseError("malformed response from gdb")
+            raise GdbResponseError(
+                "Unexpected GDB response in insert_breakpoint", self.logfile_dir,
+                response_list, "malformed_result_msg.json")
 
     def __verify_result_msg(self, result_msg):
         if ("error" in result_msg["message"]):
             payload_error_msg = result_msg["payload"]["msg"]
             if ("No line" in payload_error_msg or "No source file named" in payload_error_msg):
-                raise GdbResponseError(result_msg["payload"]["msg"])
+                raise GdbResponseError(
+                    result_msg["payload"]["msg"]+" defined in the elf file")
+            else:
+                raise GdbResponseError(
+                    "Unexpected result_msg in insert_breakpoint", self.logfile_dir,
+                    result_msg, "malformed_result_msg.json")
         else:
             return
 
@@ -302,7 +349,10 @@ class gdb:
               "No such file or directory" in response_list[2]["payload"]["msg"]):
             raise FileNotFoundError(response_list[2]["payload"]["msg"])
         else:
-            raise GdbResponseError("malformed response from gdb")
+            raise GdbResponseError(
+                "Unexpected GDB response in change_working_dir",
+                self.logfile_dir, response_list,
+                "malformed_change_working_dir.json")
 
     def continue_until_breakpoint(self, timeout_sec=1):
         self.__verify_server_connection()
@@ -315,7 +365,10 @@ class gdb:
             if (self.__breakpoint_hit(response_read) == True):
                 return
             else:
-                raise GdbResponseError("malformed response from gdb")
+                raise GdbResponseError(
+                    "Unexpected GDB response in continue_until_breakpoint",
+                    self.logfile_dir, response_read,
+                    "malformed_continue_until_breakpoint.json")
 
     def __breakpoint_hit(self, response):
         for entry in response:
@@ -323,16 +376,17 @@ class gdb:
                 return True
         return False
 
-    def stopped_at_breakpoint_with_tag(self, source_file, tag):
+    def stopped_at_breakpoint_with_tag(self, source_file_path, tag):
         info_program_rsp_list = self.gdb_controller.write("info program")
         self.__verify_stopped_at_breakpoint_st(info_program_rsp_list)
         bp_index = self.__seek_breakpoint_index(info_program_rsp_list)
         resp_break_list = self.gdb_controller.write("-break-list")
         bp_entry = self.__get_breakpoint_entry(bp_index, resp_break_list)
-        filename = self.__get_bp_file_name(bp_entry)
+        bp_filename = self.__get_bp_file_name(bp_entry)
         line_number = self.__get_breakpoint_line(bp_entry)
-        line = line_of_test_tag(tag, self.working_dir+'/'+source_file)
-        if (line == line_number and filename == source_file):
+        line = line_of_test_tag(tag, source_file_path)
+        source_file = os.path.basename(source_file_path)
+        if (line == line_number and bp_filename == source_file):
             return True
         else:
             return False
@@ -343,7 +397,8 @@ class gdb:
             if e["number"] == bp_index:
                 return e
         raise GdbResponseError(
-            "Invalid breakpoint index"+bp_index+"in breakpoints list")
+            "Invalid breakpoint index "+bp_index+" in breakpoints list./n" +
+            "Probably the breakpoint was not set.")
 
     def __get_breakpoint_line(self, bp_entry):
         return int(bp_entry["line"])
@@ -360,7 +415,8 @@ class gdb:
 
     def __verify_stopped_at_breakpoint_st(self, response_list):
         if (self.__get_program_running_state(response_list) != "Stopped at breakpoint"):
-            raise GdbResponseError("Program is not stopped at breakpoint")
+            raise GdbBreakpointNotStopped(
+                "Error stopped_at_breakpoint_with_tag: Program is not stopped at breakpoint")
 
     def __get_program_running_state(self, response_list):
         if (len(response_list) == 3 and "Selected thread is running" in response_list[1]["payload"]):
@@ -381,7 +437,9 @@ class gdb:
         if ("done" in rsp_list[0]["message"]):
             return
         else:
-            raise GdbResponseError("Malformed response from -break-delete")
+            raise GdbResponseError(
+                "Unexpected GDB response in delete_all_breakpoints",
+                self.logfile_dir, rsp_list, "malformed_delete_all_breakpoints.json")
 
     def next(self):
         next_rsp_list = self.gdb_controller.write("-exec-next")
@@ -392,14 +450,15 @@ class gdb:
             if ("notify" in entry["type"] and "stopped" in entry["message"]):
                 if ("end-stepping-range" in entry["payload"]["reason"]):
                     return
-        raise GdbResponseError("Malformed response from -exec-next")
+        raise GdbResponseError("Unexpected GDB response in next",
+                               self.logfile_dir, next_rsp_list, "malformed_next.json")
 
     def __extract_object_string(self, var_response_list):
         payload = var_response_list[1]["payload"]
         match = re.search(r"=\s(.*)\n", payload)
         if (match == None):
             raise GdbResponseError(
-                "Malformated value for payload. Got '{}'".format(payload))
+                "Unexpected GDB response in get_variable_value. Invalid payload format")
         return match.group(1)
 
     def __verify_format(self, format):
@@ -437,6 +496,8 @@ class gdb:
         response_list = self.gdb_controller.write(
             "-gdb-set logging file "+log_file_path)
         self.__verify_set_log_file_rsp(response_list)
+        self.logfile_path = log_file_path
+        self.logfile_dir = os.path.dirname(self.logfile_path)
 
     def __verify_set_log_file_rsp(self, response_list):
         if (self.__is_response_valid(response_list)):
@@ -445,18 +506,19 @@ class gdb:
             raise GdbResponseError(
                 "Error on set_log_file_path message from gdb: "+response_list[0]["payload"]["msg"])
         else:
-            raise GdbResponseError("Malformed message from GDB")
+            raise GdbResponseError(
+                "Unexpected GDB response in set_log_file_path")
 
     def start_logging(self):
-        response_list = self.gdb_controller.write("--gdb-set logging on")
+        response_list = self.gdb_controller.write("-gdb-set logging on")
         if (self.__is_response_valid(response_list)):
             return
         elif (self.__is_msg_in_payload(response_list)):
             raise GdbResponseError(
-                "Error on start_logging message from gdb: "+response_list[0]["payload"]["msg"])
+                "Error on stop_logging message from gdb. \"msg\" not present in response_list[0][\"payload\"]")
         else:
             raise GdbResponseError(
-                "Malformed message from GDB on start_logging")
+                "Unexpected GDB response in start_logging", self.logfile_dir, response_list, "malformed_start_logging.json")
 
     def stop_logging(self):
         response_list = self.gdb_controller.write("--gdb-set logging off")
@@ -464,10 +526,11 @@ class gdb:
             return
         elif (self.__is_msg_in_payload(response_list)):
             raise GdbResponseError(
-                "Error on start_logging message from gdb: "+response_list[0]["payload"]["msg"])
+                "Error on stop_logging message from gdb. \"msg\" not present in response_list[0][\"payload\"]")
         else:
             raise GdbResponseError(
-                "Malformed message from GDB on stop_logging")
+                "Unexpected GDB response in stop_logging",
+                self.logfile_dir, response_list, "malformed_stop_logging.json")
 
     def __is_msg_in_payload(self, response_list):
         return "msg" in response_list[0]["payload"]
