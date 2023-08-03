@@ -1,0 +1,21 @@
+[
+    {
+        "type": "log",
+        "message": null,
+        "payload": "print /t gpio_led_green.port\n",
+        "stream": "stdout"
+    },
+    {
+        "type": "console",
+        "message": null,
+        "payload": "$5 = 11\n",
+        "stream": "stdout"
+    },
+    {
+        "type": "result",
+        "message": "done",
+        "payload": null,
+        "token": null,
+        "stream": "stdout"
+    }
+]

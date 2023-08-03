@@ -1,0 +1,21 @@
+[
+    {
+        "type": "log",
+        "message": null,
+        "payload": "print /x my_struct\n",
+        "stream": "stdout"
+    },
+    {
+        "type": "console",
+        "message": null,
+        "payload": "$14 = {var1 = 0x3, var2 = 0xc, var3 = 0x40020c00}\n",
+        "stream": "stdout"
+    },
+    {
+        "type": "result",
+        "message": "done",
+        "payload": null,
+        "token": null,
+        "stream": "stdout"
+    }
+]

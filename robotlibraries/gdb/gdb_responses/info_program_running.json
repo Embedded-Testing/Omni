@@ -1,0 +1,23 @@
+[
+    {
+        "type": "log",
+        "message": null,
+        "payload": "info program\n",
+        "stream": "stdout"
+    },
+    {
+        "type": "log",
+        "message": null,
+        "payload": "Selected thread is running.\n",
+        "stream": "stdout"
+    },
+    {
+        "type": "result",
+        "message": "error",
+        "payload": {
+            "msg": "Selected thread is running."
+        },
+        "token": null,
+        "stream": "stdout"
+    }
+]

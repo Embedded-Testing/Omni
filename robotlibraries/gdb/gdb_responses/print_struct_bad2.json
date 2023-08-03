@@ -1,0 +1,23 @@
+[
+    {
+        "type": "log",
+        "message": null,
+        "payload": "print  no_exist_struct\n",
+        "stream": "stdout"
+    },
+    {
+        "type": "log",
+        "message": null,
+        "payload": "No symbol \"no_exist_struct\" in current context.\n",
+        "stream": "stdout"
+    },
+    {
+        "type": "result",
+        "message": "error",
+        "payload": {
+            "msg": "No symbol \"no_exist_struct\" in current context."
+        },
+        "token": null,
+        "stream": "stdout"
+    }
+]
