@@ -1,0 +1,38 @@
+[
+    {
+        "type": "result",
+        "message": "running",
+        "payload": null,
+        "token": null,
+        "stream": "stdout"
+    },
+    {
+        "type": "notify",
+        "message": "running",
+        "payload": {
+            "thread-id": "all"
+        },
+        "token": null,
+        "stream": "stdout"
+    },
+    {
+        "type": "notify",
+        "message": "stopped",
+        "payload": {
+            "reason": "xxxxxx",
+            "frame": {
+                "addr": "0x08000a74",
+                "func": "main",
+                "args": [],
+                "file": "src/GPIO_integration_test.cpp",
+                "fullname": "/home/erick/Desktop/EITF/embedded-integration-test-framework/work_dir/Integration_Tests/GPIO_integration_tests/src/GPIO_integration_test.cpp",
+                "line": "24",
+                "arch": "armv7e-m"
+            },
+            "thread-id": "1",
+            "stopped-threads": "all"
+        },
+        "token": null,
+        "stream": "stdout"
+    }
+]

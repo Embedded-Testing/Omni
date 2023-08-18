@@ -1,0 +1,14 @@
+[
+    {
+        "type": "output",
+        "message": null,
+        "payload": "my_command",
+        "stream": "stdout"
+    },
+    {
+        "type": "output",
+        "message": null,
+        "payload": "my_command",
+        "stream": "stdout"
+    }
+]

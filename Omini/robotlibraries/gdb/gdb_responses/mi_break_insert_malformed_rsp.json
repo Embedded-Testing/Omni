@@ -1,0 +1,11 @@
+[
+    {
+        "type": "result",
+        "message": "error",
+        "payload": {
+            "msg": "This is a malformed result_msg"
+        },
+        "token": null,
+        "stream": "stdout"
+    }
+]

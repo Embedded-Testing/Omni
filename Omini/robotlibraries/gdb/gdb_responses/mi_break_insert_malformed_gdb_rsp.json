@@ -1,0 +1,38 @@
+[
+    {
+        "type": "result",
+        "message": "error",
+        "payload": {
+            "msg": "This is a malformed gdb_response"
+        },
+        "token": null,
+        "stream": "stdout"
+    },
+    {
+        "type": "result",
+        "message": "error",
+        "payload": {
+            "msg": "This is a malformed gdb_response"
+        },
+        "token": null,
+        "stream": "stdout"
+    },
+    {
+        "type": "result",
+        "message": "error",
+        "payload": {
+            "msg": "This is a malformed gdb_response"
+        },
+        "token": null,
+        "stream": "stdout"
+    },
+    {
+        "type": "result",
+        "message": "error",
+        "payload": {
+            "msg": "This is a malformed gdb_response"
+        },
+        "token": null,
+        "stream": "stdout"
+    }
+]

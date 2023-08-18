@@ -1,0 +1,11 @@
+[
+    {
+        "type": "result",
+        "message": "error",
+        "payload": {
+            "msg": "Random Error only for testing"
+        },
+        "token": null,
+        "stream": "stdout"
+    }
+]

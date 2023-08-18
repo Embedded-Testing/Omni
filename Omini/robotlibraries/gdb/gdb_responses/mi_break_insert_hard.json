@@ -1,0 +1,26 @@
+[
+    {
+        "type": "result",
+        "message": "done",
+        "payload": {
+            "bkpt": {
+                "number": "2",
+                "type": "hw breakpoint",
+                "disp": "keep",
+                "enabled": "y",
+                "addr": "0x08000a8e",
+                "func": "main()",
+                "file": "src/GPIO_integration_test.cpp",
+                "fullname": "/home/erick/Desktop/EITF/embedded-integration-test-framework/work_dir/Integration_Tests/GPIO_integration_tests/src/GPIO_integration_test.cpp",
+                "line": "26",
+                "thread-groups": [
+                    "i1"
+                ],
+                "times": "0",
+                "original-location": "-source GPIO_integration_test.cpp -line 26"
+            }
+        },
+        "token": null,
+        "stream": "stdout"
+    }
+]

@@ -1,0 +1,23 @@
+[
+    {
+        "type": "log",
+        "message": null,
+        "payload": "print  non_existent_var\n",
+        "stream": "stdout"
+    },
+    {
+        "type": "log",
+        "message": null,
+        "payload": "No symbol \"non_existent_var\" in current context.\n",
+        "stream": "stdout"
+    },
+    {
+        "type": "result",
+        "message": "error",
+        "payload": {
+            "msg": "No symbol \"non_existent_var\" in current context."
+        },
+        "token": null,
+        "stream": "stdout"
+    }
+]

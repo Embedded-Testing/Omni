@@ -1,0 +1,44 @@
+[
+    {
+        "type": "output",
+        "message": null,
+        "payload": "errXXX",
+        "stream": "stdout"
+    },
+    {
+        "type": "output",
+        "message": null,
+        "payload": "errAAA",
+        "stream": "stdout"
+    },
+    {
+        "type": "output",
+        "message": null,
+        "payload": "errBBB",
+        "stream": "stdout"
+    },
+    {
+        "type": "output",
+        "message": null,
+        "payload": "errCCC",
+        "stream": "stdout"
+    },
+    {
+        "type": "output",
+        "message": null,
+        "payload": "EEEerr",
+        "stream": "stdout"
+    },
+    {
+        "type": "output",
+        "message": null,
+        "payload": "SSSerr",
+        "stream": "stdout"
+    },
+    {
+        "type": "output",
+        "message": null,
+        "payload": "eRRRrr",
+        "stream": "stdout"
+    }
+]

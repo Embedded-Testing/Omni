@@ -1,0 +1,21 @@
+[
+    {
+        "type": "log",
+        "message": null,
+        "payload": "print /t gpio_led_green\n",
+        "stream": "stdout"
+    },
+    {
+        "type": "console",
+        "message": null,
+        "payload": "$12 = {<iGPIO_Driver> = {_vptr.iGPIO_Driver = 0x8003094 <vtable for GPIO_Driver+32>, port = 1000000000000010101010000001, pin = 100000000000000000000010101000}, _vptr.GPIO_Driver = 0x8003080 <vtable for GPIO_Driver+12>, port = 11, pin = 1100, gpio_base_address = 1000000000000100000110000000000}\n",
+        "stream": "stdout"
+    },
+    {
+        "type": "result",
+        "message": "done",
+        "payload": null,
+        "token": null,
+        "stream": "stdout"
+    }
+]

@@ -1,0 +1,23 @@
+[
+    {
+        "type": "log",
+        "message": null,
+        "payload": "MALFORMED",
+        "stream": "stdout"
+    },
+    {
+        "type": "log",
+        "message": null,
+        "payload": "",
+        "stream": "stdout"
+    },
+    {
+        "type": "result",
+        "message": "XXX",
+        "payload": {
+            "msg": ""
+        },
+        "token": null,
+        "stream": "stdout"
+    }
+]

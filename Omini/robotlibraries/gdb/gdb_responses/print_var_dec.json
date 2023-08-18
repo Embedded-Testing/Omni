@@ -1,0 +1,21 @@
+[
+    {
+        "type": "log",
+        "message": null,
+        "payload": "print /d my_var\n",
+        "stream": "stdout"
+    },
+    {
+        "type": "console",
+        "message": null,
+        "payload": "$4 = 3\n",
+        "stream": "stdout"
+    },
+    {
+        "type": "result",
+        "message": "done",
+        "payload": null,
+        "token": null,
+        "stream": "stdout"
+    }
+]
