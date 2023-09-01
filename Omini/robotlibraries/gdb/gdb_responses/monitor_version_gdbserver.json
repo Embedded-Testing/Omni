@@ -1,1 +1,0 @@
-[{"type": "log", "message": null, "payload": "monitor version\n", "stream": "stdout"}, {"type": "log", "message": null, "payload": "Target does not support this command.\n", "stream": "stdout"}, {"type": "result", "message": "error", "payload": {"msg": "Target does not support this command."}, "token": null, "stream": "stdout"}]

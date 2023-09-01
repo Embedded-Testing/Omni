@@ -1,9 +1,0 @@
-[
-    {
-        "type": "resultXXX",
-        "message": "asdasdasd",
-        "payload": "42WrongFalsePayload Malformed MSG",
-        "token": null,
-        "stream": "stdout"
-    }
-]

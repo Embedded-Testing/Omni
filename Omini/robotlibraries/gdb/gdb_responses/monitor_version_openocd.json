@@ -1,1 +1,0 @@
-[{"type": "log", "message": null, "payload": "monitor version\n", "stream": "stdout"}, {"type": "target", "message": null, "payload": "Open On-Chip Debugger 0.10.0", "stream": "stdout"}, {"type": "target", "message": null, "payload": "\n", "stream": "stdout"}, {"type": "result", "message": "done", "payload": null, "token": null, "stream": "stdout"}]
