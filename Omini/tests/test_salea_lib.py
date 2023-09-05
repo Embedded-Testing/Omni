@@ -1,6 +1,11 @@
 import unittest
 import pytest
-from Omini.robotlibraries.salea import LogicAnalyzer, SaleaConfigurationError, SaleaConnectionTimeout
+from Omini.robotlibraries.salea import (LogicAnalyzer,
+                                        SaleaConfigurationError,
+                                        SaleaConnectionTimeout,
+                                        config_spi_channels,
+                                        config_spi_protocol)
+
 from unittest.mock import patch, Mock, MagicMock
 from saleae.automation import *
 
@@ -10,12 +15,12 @@ class TestSalea(unittest.TestCase):
     def test_connect_raises_exception_if_connection_timeout(self):
         my_logic = LogicAnalyzer()
         with pytest.raises(SaleaConnectionTimeout, match=".*Unable to connect to Salea application. Verify connection on.*"):
-            my_logic.connect_to_salea_application(timeout_seconds=0.1)
+            my_logic.connect_to_backend(timeout_seconds=0.1)
 
     @patch('saleae.automation.Manager.connect')
     def test_connect(self, mock_mgr_connect):
         my_logic = LogicAnalyzer()
-        my_logic.connect_to_salea_application(timeout_seconds=1)
+        my_logic.connect_to_backend(timeout_seconds=1)
         mock_mgr_connect.assert_called_once_with(
             port=10430,
             address='127.0.0.1',
@@ -96,7 +101,7 @@ class TestSalea(unittest.TestCase):
         my_logic = LogicAnalyzer()
         my_logic.set_timed_capture(3)
         with pytest.raises(SaleaConfigurationError, match=r".*Device Configuration Error.*"):
-            my_logic.start_salea_capture()
+            my_logic.start_capture()
 
     @patch('saleae.automation.Manager.start_capture')
     @patch('saleae.automation.LogicDeviceConfiguration', return_value=["mocked_configuration"])
@@ -105,22 +110,58 @@ class TestSalea(unittest.TestCase):
         my_logic.set_device_configuration(
             analog_sample_rate=30000, enabled_analog_channels=[1, 2])
         with pytest.raises(SaleaConfigurationError, match=r".*Capture Configuration Error.*"):
-            my_logic.start_salea_capture()
+            my_logic.start_capture()
 
     @patch("Omini.robotlibraries.salea.SaleaLogicAnalyzer.automation.Manager")
-    def test_set_start_captureX(self, mock_connect):
+    def test_set_start_capture(self, mock_connect):
         my_logic = LogicAnalyzer()
         mock_manager_instance = mock_connect.connect.return_value
         mock_start_capture = MagicMock()
         mock_manager_instance.start_capture = mock_start_capture
-        my_logic.connect_to_salea_application(timeout_seconds=1)
+        my_logic.connect_to_backend(timeout_seconds=1)
         my_logic.set_device_configuration(
             analog_sample_rate=30000, enabled_analog_channels=[1, 2])
         my_logic.set_timed_capture(3)
-        my_logic.start_salea_capture()
+        my_logic.start_capture()
         print(dir(my_logic))
         mock_manager_instance.start_capture.assert_called_once_with(
             device_id=None,
             device_configuration=my_logic._LogicAnalyzer__device_configuration,
             capture_configuration=my_logic._LogicAnalyzer__capture_configuration
         )
+
+    def test_wait_capture_end_calls_api(self):
+        my_logic = LogicAnalyzer()
+        mock_wait = Mock()
+        my_logic.capture = mock_wait
+        my_logic.wait_capture_end()
+        mock_wait.wait.assert_called_once()
+
+    def test_disconnect_from_backend_calls_close(self):
+        my_logic = LogicAnalyzer()
+        mock_disconnect = Mock()
+        my_logic.manager = mock_disconnect
+        my_logic.disconnect_from_backend()
+        mock_disconnect.close.assert_called_once()
+
+    def test_add_spi_analyser_adds_analyser_with_protocol_and_cfg(self):
+        expected_dict = {'MISO': 1,
+                         'MOSI': 2,
+                         'Enable': 3,
+                         'Clock': 4,
+                         'Bits per Transfer': '8 Bits per Transfer (Standard)',
+                         'Significant Bit': 'Most Significant Bit First (Standard)',
+                         'Clock State': 'Clock is Low when inactive (CPOL = 0)',
+                         'Clock Phase': 'Data is Valid on Clock Leading Edge (CPHA = 0)',
+                         'Enable Line': 'Enable line is Active Low (Standard)'}
+        my_logic = LogicAnalyzer()
+        mock_spi_analyzer = Mock()
+        my_logic.capture = mock_spi_analyzer
+        spi_channels_cfg = config_spi_channels(
+            MISO=1, MOSI=2, Enable=3, Clock=4)
+        spi_protocol_cfg = config_spi_protocol(
+            DATA_FRAME_SIZE=8, FIRST_BIT='MSB', CPHA=0, CPOL=0, EnableLineActiveOn=0)
+        my_logic.add_spi_analyser(
+            spi_channels_cfg, spi_protocol_cfg, "TEST_SPI")
+        mock_spi_analyzer.add_analyzer.assert_called_with(
+            'SPI', label='TEST_SPI', settings=expected_dict)
