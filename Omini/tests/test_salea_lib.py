@@ -6,7 +6,7 @@ from Omini.robotlibraries.salea import (LogicAnalyzer,
                                         config_spi_channels,
                                         config_spi_protocol)
 
-from unittest.mock import patch, Mock, MagicMock
+from unittest.mock import patch, Mock, MagicMock, ANY
 from saleae.automation import *
 
 
@@ -165,3 +165,103 @@ class TestSalea(unittest.TestCase):
             spi_channels_cfg, spi_protocol_cfg, "TEST_SPI")
         mock_spi_analyzer.add_analyzer.assert_called_with(
             'SPI', label='TEST_SPI', settings=expected_dict)
+
+    @patch("Omini.robotlibraries.salea.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
+           return_value="mocked_ExportConfiguration")
+    def test_export_to_csv_calls_api_hex(self, mock_export_cfg):
+        my_logic = LogicAnalyzer()
+        mock_spi_analyzer = Mock()
+        my_logic.capture = mock_spi_analyzer
+        spi_channels_cfg = config_spi_channels(
+            MISO=1, MOSI=2, Enable=3, Clock=4)
+        spi_protocol_cfg = config_spi_protocol(
+            DATA_FRAME_SIZE=8, FIRST_BIT='MSB', CPHA=0, CPOL=0, EnableLineActiveOn=0)
+        my_logic.add_spi_analyser(
+            spi_channels_cfg, spi_protocol_cfg, "TEST_SPI")
+        my_logic.export_to_csv("/folder/to/csv/capture",
+                               "capture_name.txt", "HEXADECIMAL")
+        mock_export_cfg.assert_called_with(
+            ANY, saleae.automation.capture.RadixType.HEXADECIMAL)
+        mock_spi_analyzer.export_data_table.assert_called_with(
+            filepath='/folder/to/csv/capture/capture_name.txt', analyzers=ANY)
+
+    @patch("Omini.robotlibraries.salea.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
+           return_value="mocked_ExportConfiguration")
+    def test_export_to_csv_calls_api_bin(self, mock_export_cfg):
+        my_logic = LogicAnalyzer()
+        mock_spi_analyzer = Mock()
+        my_logic.capture = mock_spi_analyzer
+        spi_channels_cfg = config_spi_channels(
+            MISO=1, MOSI=2, Enable=3, Clock=4)
+        spi_protocol_cfg = config_spi_protocol(
+            DATA_FRAME_SIZE=8, FIRST_BIT='MSB', CPHA=0, CPOL=0, EnableLineActiveOn=0)
+        my_logic.add_spi_analyser(
+            spi_channels_cfg, spi_protocol_cfg, "TEST_SPI")
+        my_logic.export_to_csv("/folder/to/csv/capture",
+                               "capture_name.txt", "BINARY")
+        mock_export_cfg.assert_called_with(
+            ANY, saleae.automation.capture.RadixType.BINARY)
+        mock_spi_analyzer.export_data_table.assert_called_with(
+            filepath='/folder/to/csv/capture/capture_name.txt', analyzers=ANY)
+
+    @patch("Omini.robotlibraries.salea.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
+           return_value="mocked_ExportConfiguration")
+    def test_export_to_csv_calls_api_dec(self, mock_export_cfg):
+        my_logic = LogicAnalyzer()
+        mock_spi_analyzer = Mock()
+        my_logic.capture = mock_spi_analyzer
+        spi_channels_cfg = config_spi_channels(
+            MISO=1, MOSI=2, Enable=3, Clock=4)
+        spi_protocol_cfg = config_spi_protocol(
+            DATA_FRAME_SIZE=8, FIRST_BIT='MSB', CPHA=0, CPOL=0, EnableLineActiveOn=0)
+        my_logic.add_spi_analyser(
+            spi_channels_cfg, spi_protocol_cfg, "TEST_SPI")
+        my_logic.export_to_csv("/folder/to/csv/capture",
+                               "capture_name.txt", "DECIMAL")
+        mock_export_cfg.assert_called_with(
+            ANY, saleae.automation.capture.RadixType.DECIMAL)
+        mock_spi_analyzer.export_data_table.assert_called_with(
+            filepath='/folder/to/csv/capture/capture_name.txt', analyzers=ANY)
+
+    @patch("Omini.robotlibraries.salea.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
+           return_value="mocked_ExportConfiguration")
+    def test_export_to_csv_calls_api_ascii(self, mock_export_cfg):
+        my_logic = LogicAnalyzer()
+        mock_spi_analyzer = Mock()
+        my_logic.capture = mock_spi_analyzer
+        spi_channels_cfg = config_spi_channels(
+            MISO=1, MOSI=2, Enable=3, Clock=4)
+        spi_protocol_cfg = config_spi_protocol(
+            DATA_FRAME_SIZE=8, FIRST_BIT='MSB', CPHA=0, CPOL=0, EnableLineActiveOn=0)
+        my_logic.add_spi_analyser(
+            spi_channels_cfg, spi_protocol_cfg, "TEST_SPI")
+        my_logic.export_to_csv("/folder/to/csv/capture",
+                               "capture_name.txt", "ASCII")
+        mock_export_cfg.assert_called_with(
+            ANY, saleae.automation.capture.RadixType.ASCII)
+        mock_spi_analyzer.export_data_table.assert_called_with(
+            filepath='/folder/to/csv/capture/capture_name.txt', analyzers=ANY)
+
+    @patch("Omini.robotlibraries.salea.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
+           return_value="mocked_ExportConfiguration")
+    def test_export_to_csv_calls_api_invalid(self, mock_export_cfg):
+        my_logic = LogicAnalyzer()
+        mock_spi_analyzer = Mock()
+        my_logic.capture = mock_spi_analyzer
+        spi_channels_cfg = config_spi_channels(
+            MISO=1, MOSI=2, Enable=3, Clock=4)
+        spi_protocol_cfg = config_spi_protocol(
+            DATA_FRAME_SIZE=8, FIRST_BIT='MSB', CPHA=0, CPOL=0, EnableLineActiveOn=0)
+        my_logic.add_spi_analyser(
+            spi_channels_cfg, spi_protocol_cfg, "TEST_SPI")
+        with pytest.raises(ValueError, match=r".*Invalid value for radix.*"):
+            my_logic.export_to_csv("/folder/to/csv/capture",
+                                   "capture_name.txt", "INVALID")
+
+    def test_sae_raw(self):
+        my_logic = LogicAnalyzer()
+        mock_capture = Mock()
+        my_logic.capture = mock_capture
+        my_logic.save_raw("/path/to/folder", "filename")
+        mock_capture.save_capture.assert_called_once_with(
+            filepath='/path/to/folder/filename')
