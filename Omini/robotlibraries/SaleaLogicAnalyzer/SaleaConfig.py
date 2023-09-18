@@ -1,4 +1,10 @@
 
+def config_i2c_channels(SCL: int, SDA: int) -> dict:
+    i2c_channels_dict = {}
+    i2c_channels_dict["SCL"] = int(SCL)
+    i2c_channels_dict["SDA"] = int(SDA)
+    return i2c_channels_dict
+
 
 def config_spi_channels(MISO=None, MOSI=None, Enable=None, Clock=None) -> dict:
     spi_channels_dict = {}

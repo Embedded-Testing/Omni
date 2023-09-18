@@ -17,6 +17,7 @@ class LogicAnalyzer:
         self.__device_configuration = None
         self.__capture_configuration = None
         self.manager = None
+        self.analyzer_dicts = {}
         return
 
     def connect_to_backend(self, port=10430, address='127.0.0.1', timeout_seconds=3.0) -> None:
@@ -89,12 +90,33 @@ class LogicAnalyzer:
     def disconnect_from_backend(self) -> None:
         self.manager.close()
 
+    def add_i2c_analyser(self, i2c_channel_cfg: dict, label: str):
+        self.__validate_analyser_label(label)
+        i2c_analyzer = self.capture.add_analyzer(
+            'I2C', label=label, settings=i2c_channel_cfg)
+        self.__save_analyser(label, i2c_analyzer)
+
     def add_spi_analyser(self, SPI_CHANNEL_CFG: dict, PROTOCOL_CFG: dict, label: str) -> None:
+        self.__validate_analyser_label(label)
+        spi_settings = self.__build_spi_settings(SPI_CHANNEL_CFG, PROTOCOL_CFG)
+        spi_analyzer = self.capture.add_analyzer(
+            'SPI', label=label, settings=spi_settings)
+        self.__save_analyser(label, spi_analyzer)
+
+    def __save_analyser(self, label, analyzer):
+        self.__validate_analyser_label(label)
+        self.analyzer_dicts[label] = analyzer
+
+    def __build_spi_settings(self, SPI_CHANNEL_CFG, PROTOCOL_CFG):
         CHANNEL = self._build_spi_channel_cfg(SPI_CHANNEL_CFG)
         PROTOCOL = self._build_protocol_cfg(PROTOCOL_CFG)
         spi_settings = {**CHANNEL, **PROTOCOL}
-        self.spi_analyzer = self.capture.add_analyzer(
-            'SPI', label=label, settings=spi_settings)
+        return spi_settings
+
+    def __validate_analyser_label(self, label):
+        if (label in self.analyzer_dicts):
+            raise ValueError(
+                f"Analysers must have unique labels. Label {label} already used.")
 
     def _build_protocol_cfg(self, PROTOCOL_CFG):
         cfg = {}
@@ -137,11 +159,14 @@ class LogicAnalyzer:
             cfg["Clock"] = int(SPI_CHANNEL_CFG["Clock"])
         return cfg
 
-    def export_to_csv(self, folder_path: str, file_name: str, radix="HEXADECIMAL") -> None:
+    def export_to_csv(self, folder_path: str, file_name: str, analyser_label, radix="HEXADECIMAL") -> None:
         radix = self.__extract_radix(radix)
         path = os.path.join(folder_path, file_name)
+        if (not analyser_label in self.analyzer_dicts.keys()):
+            raise ValueError(
+                f"Analyser {analyser_label} not added. You must first add the analyser with the add_*_analyser methods.")
         ExportConfiguration = automation.capture.DataTableExportConfiguration(
-            self.spi_analyzer, radix)
+            self.analyzer_dicts[analyser_label], radix)
         self.capture.export_data_table(
             filepath=path,
             analyzers=[ExportConfiguration]

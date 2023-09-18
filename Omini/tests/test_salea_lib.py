@@ -4,7 +4,8 @@ from Omini.robotlibraries.SaleaLogicAnalyzer import (LogicAnalyzer,
                                                      SaleaConfigurationError,
                                                      SaleaConnectionTimeout,
                                                      config_spi_channels,
-                                                     config_spi_protocol)
+                                                     config_spi_protocol,
+                                                     config_i2c_channels)
 
 from unittest.mock import patch, Mock, MagicMock, ANY
 from saleae.automation import *
@@ -166,6 +167,84 @@ class TestSalea(unittest.TestCase):
         mock_spi_analyzer.add_analyzer.assert_called_with(
             'SPI', label='TEST_SPI', settings=expected_dict)
 
+    def test_add_spi_analyser_does_not_add_two_analysers_with_same_label(self):
+        my_logic = LogicAnalyzer()
+        mock_spi_analyzer = Mock()
+        my_logic.capture = mock_spi_analyzer
+        spi_channels_cfg = config_spi_channels(
+            MISO=1, MOSI=2, Enable=3, Clock=4)
+        spi_protocol_cfg = config_spi_protocol(
+            DATA_FRAME_SIZE=8, FIRST_BIT='MSB', CPHA=0, CPOL=0, EnableLineActiveOn=0)
+        my_logic.add_spi_analyser(
+            spi_channels_cfg, spi_protocol_cfg, "TEST_SPI")
+        with pytest.raises(ValueError, match=r".*Analysers must have unique labels.*"):
+            my_logic.add_spi_analyser(
+                spi_channels_cfg, spi_protocol_cfg, "TEST_SPI")
+
+    @patch("Omini.robotlibraries.SaleaLogicAnalyzer.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
+           return_value="mocked_ExportConfiguration")
+    def test_export_to_csv_calls_api_with_spi_analyser(self, mock_export_cfg):
+        my_logic = LogicAnalyzer()
+        mock_spi_analyzer = Mock()
+        my_logic.capture = mock_spi_analyzer
+        spi_channels_cfg = config_spi_channels(
+            MISO=1, MOSI=2, Enable=3, Clock=4)
+        spi_protocol_cfg = config_spi_protocol(
+            DATA_FRAME_SIZE=8, FIRST_BIT='MSB', CPHA=0, CPOL=0, EnableLineActiveOn=0)
+        my_logic.add_spi_analyser(
+            spi_channels_cfg, spi_protocol_cfg, "TEST_SPI")
+        my_logic.export_to_csv("/folder/to/csv/capture",
+                               "capture_name.txt", "TEST_SPI", radix="HEXADECIMAL")
+        mock_export_cfg.assert_called_with(
+            mock_spi_analyzer.add_analyzer(), ANY)
+
+    def test_add_i2c_analyser_adds_analyser_with_protocol_and_cfg(self):
+        expected_dict = {'SDA': 1,
+                         'SCL': 0,
+                         }
+        my_logic = LogicAnalyzer()
+        mock_i2c_analyzer = Mock()
+        my_logic.capture = mock_i2c_analyzer
+        i2c_channels_cfg = config_i2c_channels(
+            SDA=1, SCL=0)
+        my_logic.add_i2c_analyser(
+            i2c_channels_cfg, label="TEST_I2C")
+        mock_i2c_analyzer.add_analyzer.assert_called_with(
+            'I2C', label='TEST_I2C', settings=expected_dict)
+
+    @patch("Omini.robotlibraries.SaleaLogicAnalyzer.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
+           return_value="mocked_ExportConfiguration")
+    def test_export_to_csv_calls_api_with_spi_analyser(self, mock_export_cfg):
+        my_logic = LogicAnalyzer()
+        mock_i2c_analyzer = Mock()
+        my_logic.capture = mock_i2c_analyzer
+        i2c_channels_cfg = config_i2c_channels(
+            SDA=1, SCL=0)
+        my_logic.add_i2c_analyser(
+            i2c_channels_cfg, label="TEST_I2C")
+        my_logic.export_to_csv("/folder/to/csv/capture",
+                               "capture_name.txt", "TEST_I2C", radix="HEXADECIMAL")
+        mock_export_cfg.assert_called_with(
+            mock_i2c_analyzer.add_analyzer(), ANY)
+
+    def test_add_analyser_raises_exception_if_analyser_does_not_exists(self):
+        my_logic = LogicAnalyzer()
+        with pytest.raises(ValueError, match=r".*Analyser NON_EXISTENT_ANALYSER not added.*"):
+            my_logic.export_to_csv("/folder/to/csv/capture",
+                                   "capture_name.txt", "NON_EXISTENT_ANALYSER")
+
+    def test_add_i2c_analyser_does_not_add_two_analysers_with_same_label(self):
+        my_logic = LogicAnalyzer()
+        mock_i2c_analyzer = Mock()
+        my_logic.capture = mock_i2c_analyzer
+        i2c_channels_cfg = config_i2c_channels(
+            SDA=1, SCL=0)
+        my_logic.add_i2c_analyser(
+            i2c_channels_cfg, label="TEST_I2C")
+        with pytest.raises(ValueError, match=r".*Analysers must have unique labels.*"):
+            my_logic.add_i2c_analyser(
+                i2c_channels_cfg, label="TEST_I2C")
+
     @patch("Omini.robotlibraries.SaleaLogicAnalyzer.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
            return_value="mocked_ExportConfiguration")
     def test_export_to_csv_calls_api_hex(self, mock_export_cfg):
@@ -179,7 +258,7 @@ class TestSalea(unittest.TestCase):
         my_logic.add_spi_analyser(
             spi_channels_cfg, spi_protocol_cfg, "TEST_SPI")
         my_logic.export_to_csv("/folder/to/csv/capture",
-                               "capture_name.txt", "HEXADECIMAL")
+                               "capture_name.txt", "TEST_SPI", radix="HEXADECIMAL")
         mock_export_cfg.assert_called_with(
             ANY, saleae.automation.capture.RadixType.HEXADECIMAL)
         mock_spi_analyzer.export_data_table.assert_called_with(
@@ -198,7 +277,7 @@ class TestSalea(unittest.TestCase):
         my_logic.add_spi_analyser(
             spi_channels_cfg, spi_protocol_cfg, "TEST_SPI")
         my_logic.export_to_csv("/folder/to/csv/capture",
-                               "capture_name.txt", "BINARY")
+                               "capture_name.txt", "TEST_SPI", radix="BINARY")
         mock_export_cfg.assert_called_with(
             ANY, saleae.automation.capture.RadixType.BINARY)
         mock_spi_analyzer.export_data_table.assert_called_with(
@@ -217,7 +296,7 @@ class TestSalea(unittest.TestCase):
         my_logic.add_spi_analyser(
             spi_channels_cfg, spi_protocol_cfg, "TEST_SPI")
         my_logic.export_to_csv("/folder/to/csv/capture",
-                               "capture_name.txt", "DECIMAL")
+                               "capture_name.txt", "TEST_SPI", radix="DECIMAL")
         mock_export_cfg.assert_called_with(
             ANY, saleae.automation.capture.RadixType.DECIMAL)
         mock_spi_analyzer.export_data_table.assert_called_with(
@@ -236,7 +315,7 @@ class TestSalea(unittest.TestCase):
         my_logic.add_spi_analyser(
             spi_channels_cfg, spi_protocol_cfg, "TEST_SPI")
         my_logic.export_to_csv("/folder/to/csv/capture",
-                               "capture_name.txt", "ASCII")
+                               "capture_name.txt", "TEST_SPI", radix="ASCII")
         mock_export_cfg.assert_called_with(
             ANY, saleae.automation.capture.RadixType.ASCII)
         mock_spi_analyzer.export_data_table.assert_called_with(
@@ -253,10 +332,10 @@ class TestSalea(unittest.TestCase):
         spi_protocol_cfg = config_spi_protocol(
             DATA_FRAME_SIZE=8, FIRST_BIT='MSB', CPHA=0, CPOL=0, EnableLineActiveOn=0)
         my_logic.add_spi_analyser(
-            spi_channels_cfg, spi_protocol_cfg, "TEST_SPI")
+            spi_channels_cfg, spi_protocol_cfg, label="TEST_SPI")
         with pytest.raises(ValueError, match=r".*Invalid value for radix.*"):
             my_logic.export_to_csv("/folder/to/csv/capture",
-                                   "capture_name.txt", "INVALID")
+                                   "capture_name.txt", "TEST_SPI", "INVALID")
 
     def test_sae_raw(self):
         my_logic = LogicAnalyzer()
