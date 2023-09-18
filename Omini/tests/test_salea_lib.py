@@ -1,10 +1,10 @@
 import unittest
 import pytest
-from Omini.robotlibraries.salea import (LogicAnalyzer,
-                                        SaleaConfigurationError,
-                                        SaleaConnectionTimeout,
-                                        config_spi_channels,
-                                        config_spi_protocol)
+from Omini.robotlibraries.SaleaLogicAnalyzer import (LogicAnalyzer,
+                                                     SaleaConfigurationError,
+                                                     SaleaConnectionTimeout,
+                                                     config_spi_channels,
+                                                     config_spi_protocol)
 
 from unittest.mock import patch, Mock, MagicMock, ANY
 from saleae.automation import *
@@ -112,7 +112,7 @@ class TestSalea(unittest.TestCase):
         with pytest.raises(SaleaConfigurationError, match=r".*Capture Configuration Error.*"):
             my_logic.start_capture()
 
-    @patch("Omini.robotlibraries.salea.SaleaLogicAnalyzer.automation.Manager")
+    @patch("Omini.robotlibraries.SaleaLogicAnalyzer.SaleaLogicAnalyzer.automation.Manager")
     def test_set_start_capture(self, mock_connect):
         my_logic = LogicAnalyzer()
         mock_manager_instance = mock_connect.connect.return_value
@@ -166,7 +166,7 @@ class TestSalea(unittest.TestCase):
         mock_spi_analyzer.add_analyzer.assert_called_with(
             'SPI', label='TEST_SPI', settings=expected_dict)
 
-    @patch("Omini.robotlibraries.salea.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
+    @patch("Omini.robotlibraries.SaleaLogicAnalyzer.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
            return_value="mocked_ExportConfiguration")
     def test_export_to_csv_calls_api_hex(self, mock_export_cfg):
         my_logic = LogicAnalyzer()
@@ -185,7 +185,7 @@ class TestSalea(unittest.TestCase):
         mock_spi_analyzer.export_data_table.assert_called_with(
             filepath='/folder/to/csv/capture/capture_name.txt', analyzers=ANY)
 
-    @patch("Omini.robotlibraries.salea.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
+    @patch("Omini.robotlibraries.SaleaLogicAnalyzer.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
            return_value="mocked_ExportConfiguration")
     def test_export_to_csv_calls_api_bin(self, mock_export_cfg):
         my_logic = LogicAnalyzer()
@@ -204,7 +204,7 @@ class TestSalea(unittest.TestCase):
         mock_spi_analyzer.export_data_table.assert_called_with(
             filepath='/folder/to/csv/capture/capture_name.txt', analyzers=ANY)
 
-    @patch("Omini.robotlibraries.salea.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
+    @patch("Omini.robotlibraries.SaleaLogicAnalyzer.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
            return_value="mocked_ExportConfiguration")
     def test_export_to_csv_calls_api_dec(self, mock_export_cfg):
         my_logic = LogicAnalyzer()
@@ -223,7 +223,7 @@ class TestSalea(unittest.TestCase):
         mock_spi_analyzer.export_data_table.assert_called_with(
             filepath='/folder/to/csv/capture/capture_name.txt', analyzers=ANY)
 
-    @patch("Omini.robotlibraries.salea.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
+    @patch("Omini.robotlibraries.SaleaLogicAnalyzer.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
            return_value="mocked_ExportConfiguration")
     def test_export_to_csv_calls_api_ascii(self, mock_export_cfg):
         my_logic = LogicAnalyzer()
@@ -242,7 +242,7 @@ class TestSalea(unittest.TestCase):
         mock_spi_analyzer.export_data_table.assert_called_with(
             filepath='/folder/to/csv/capture/capture_name.txt', analyzers=ANY)
 
-    @patch("Omini.robotlibraries.salea.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
+    @patch("Omini.robotlibraries.SaleaLogicAnalyzer.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
            return_value="mocked_ExportConfiguration")
     def test_export_to_csv_calls_api_invalid(self, mock_export_cfg):
         my_logic = LogicAnalyzer()
