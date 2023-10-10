@@ -16,6 +16,7 @@ class LogicAnalyzer:
     def __init__(self):
         self.__device_configuration = None
         self.__capture_configuration = None
+        self.__glitch_filter_list = []
         self.manager = None
         self.analyzer_dicts = {}
         return
@@ -38,13 +39,22 @@ class LogicAnalyzer:
         digital_threshold_volts = self.__to_float(digital_threshold_volts)
         enabled_digital_chanels = self.__ls_to_int(enabled_digital_chanels)
         enabled_analog_channels = self.__ls_to_int(enabled_analog_channels)
+        enabled_glitch_filters = self.__glitch_filter_list
         self.__device_configuration = automation.LogicDeviceConfiguration(
             enabled_digital_channels=enabled_digital_chanels,
             digital_sample_rate=digital_sample_rate,
             enabled_analog_channels=enabled_analog_channels,
             analog_sample_rate=analog_sample_rate,
             digital_threshold_volts=digital_threshold_volts,
+            glitch_filters=enabled_glitch_filters
         )
+
+    def add_glitch_filter(self, digtal_channel=int, filter=float):
+        sfilter = self.__to_float(filter)
+        sdigtal_channel = self.__to_int(digtal_channel)
+        self.__glitch_filter_list.append(
+            automation.GlitchFilterEntry(sdigtal_channel, sfilter))
+        return
 
     def __to_int(self, value):
         if (value != None):

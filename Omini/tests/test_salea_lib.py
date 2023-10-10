@@ -38,7 +38,8 @@ class TestSalea(unittest.TestCase):
             digital_sample_rate=50000,
             enabled_analog_channels=None,
             analog_sample_rate=None,
-            digital_threshold_volts=None
+            digital_threshold_volts=None,
+            glitch_filters=[]
         )
 
     @patch('saleae.automation.LogicDeviceConfiguration')
@@ -51,7 +52,8 @@ class TestSalea(unittest.TestCase):
             digital_sample_rate=20000,
             enabled_analog_channels=None,
             analog_sample_rate=None,
-            digital_threshold_volts=1.2
+            digital_threshold_volts=1.2,
+            glitch_filters=[]
         )
 
     @patch('saleae.automation.LogicDeviceConfiguration')
@@ -64,7 +66,8 @@ class TestSalea(unittest.TestCase):
             digital_sample_rate=None,
             enabled_analog_channels=[1, 2],
             analog_sample_rate=30000,
-            digital_threshold_volts=None
+            digital_threshold_volts=None,
+            glitch_filters=[]
         )
 
     @patch('saleae.automation.LogicDeviceConfiguration')
@@ -77,7 +80,8 @@ class TestSalea(unittest.TestCase):
             analog_sample_rate=30000,
             enabled_digital_channels=None,
             digital_sample_rate=None,
-            digital_threshold_volts=None
+            digital_threshold_volts=None,
+            glitch_filters=[]
         )
 
     @patch('saleae.automation.CaptureConfiguration')
@@ -344,3 +348,43 @@ class TestSalea(unittest.TestCase):
         my_logic.save_raw("/path/to/folder", "filename")
         mock_capture.save_capture.assert_called_once_with(
             filepath='/path/to/folder/filename')
+
+    def test_glitch_filder_appends_new_filter(self):
+        my_logic = LogicAnalyzer()
+        assert len(my_logic._LogicAnalyzer__glitch_filter_list) == 0
+        my_logic.add_glitch_filter(1, 1e-05)
+        assert len(my_logic._LogicAnalyzer__glitch_filter_list) == 1
+        assert my_logic._LogicAnalyzer__glitch_filter_list[0].channel_index == 1
+        assert my_logic._LogicAnalyzer__glitch_filter_list[0].pulse_width_seconds == 0.00001
+
+    @patch('saleae.automation.LogicDeviceConfiguration')
+    def test_set_device_configuration_configures_glitch_filters(self, mock_device_cfg):
+        my_logic = LogicAnalyzer()
+        my_logic.add_glitch_filter(1, 1e-05)
+        my_logic.set_device_configuration(
+            digital_sample_rate=20000, enabled_digital_chanels=[1, 2], digital_threshold_volts=1.2)
+        mock_device_cfg.assert_called_once_with(
+            enabled_digital_channels=[1, 2],
+            digital_sample_rate=20000,
+            enabled_analog_channels=None,
+            analog_sample_rate=None,
+            digital_threshold_volts=1.2,
+            glitch_filters=[GlitchFilterEntry(
+                channel_index=1, pulse_width_seconds=1e-05)]
+        )
+
+    @patch('saleae.automation.LogicDeviceConfiguration')
+    def test_set_device_configuration_configures_glitch_filters2(self, mock_device_cfg):
+        my_logic = LogicAnalyzer()
+        my_logic.add_glitch_filter("1", "1e-05")
+        my_logic.set_device_configuration(
+            digital_sample_rate=20000, enabled_digital_chanels=[1, 2], digital_threshold_volts=1.2)
+        mock_device_cfg.assert_called_once_with(
+            enabled_digital_channels=[1, 2],
+            digital_sample_rate=20000,
+            enabled_analog_channels=None,
+            analog_sample_rate=None,
+            digital_threshold_volts=1.2,
+            glitch_filters=[GlitchFilterEntry(
+                channel_index=1, pulse_width_seconds=1e-05)]
+        )
