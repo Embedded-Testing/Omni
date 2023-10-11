@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import subprocess
-from ..robotlibraries.gdb import *
+from ...robotlibraries.gdb import *
 from pygdbmi.gdbcontroller import *
 from pygdbmi.constants import *
 import json

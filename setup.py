@@ -13,7 +13,8 @@ setup(
         'pygdbmi>=0.11.0.0',
         'tomli>=2.0.1'
     ],
-    package_data={'Omini': ['tests/gdb_responses/*.*','tox.ini', 'README.md', 'LICENSE']},
+    package_data={'Omini': [
+        'tests/unit_tests/gdb_responses/*.*', 'tox.ini', 'README.md', 'LICENSE']},
     author='Erick Setubal Bacurau',
     author_email='your@email.com',
     description='A Framework for Integration Testing in Embedded Systems',

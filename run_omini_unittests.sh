@@ -1,1 +1,1 @@
-pytest Omini/tests/test_* -v
+pytest Omini/tests/unit_tests/test_* -v

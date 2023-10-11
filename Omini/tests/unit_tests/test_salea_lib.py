@@ -5,7 +5,9 @@ from Omini.robotlibraries.SaleaLogicAnalyzer import (LogicAnalyzer,
                                                      SaleaConnectionTimeout,
                                                      config_spi_channels,
                                                      config_spi_protocol,
-                                                     config_i2c_channels)
+                                                     config_i2c_channels,
+                                                     config_uart_channel
+                                                     )
 
 from unittest.mock import patch, Mock, MagicMock, ANY
 from saleae.automation import *
@@ -13,7 +15,8 @@ from saleae.automation import *
 
 class TestSalea(unittest.TestCase):
 
-    def test_connect_raises_exception_if_connection_timeout(self):
+    @patch('saleae.automation.Manager.connect', side_effect=Exception())
+    def test_connect_raises_exception_if_connection_timeout(self, mock_mgr_connect):
         my_logic = LogicAnalyzer()
         with pytest.raises(SaleaConnectionTimeout, match=".*Unable to connect to Salea application. Verify connection on.*"):
             my_logic.connect_to_backend(timeout_seconds=0.1)
@@ -306,6 +309,87 @@ class TestSalea(unittest.TestCase):
         mock_spi_analyzer.export_data_table.assert_called_with(
             filepath='/folder/to/csv/capture/capture_name.txt', analyzers=ANY)
 
+    base_uart_dict = {"Input Channel": 2,
+                      "Bit Rate (Bits/s)": 115200,
+                      "Bits per Frame": "8 Bits per Transfer (Standard)",
+                      "Stop Bits": "1 Stop Bit (Standard)",
+                      "Parity Bit": "No Parity Bit (Standard)",
+                      "Significant Bit": "Least Significant Bit Sent First (Standard)",
+                      "Signal inversion": "Non Inverted (Standard)",
+                      "Mode": "Normal"}
+
+    def test_config_uart_builds_base_uart_dict(self):
+        uart_channel_cfg = config_uart_channel(
+            Channel=2, BitRate=115200, BitsPerFrame=8, StopBits=1, Parity="None",
+            Indianess="LSB", Inversion=False, AddressMode="Normal")
+        assert self.base_uart_dict == uart_channel_cfg
+
+    def test_config_uart_builds_uart_cfg_dict_alternate_values(self):
+        expected_dict = {"Input Channel": 3,
+                         "Bit Rate (Bits/s)": 9600,
+                         "Bits per Frame": "9 Bits per Transfer",
+                         "Stop Bits": "1.5 Stop Bits",
+                         "Parity Bit": "Even Parity Bit",
+                         "Significant Bit": "Most Significant Bit Sent First",
+                         "Signal inversion": "Inverted",
+                         "Mode": "MP - Address indicated by MSB=0"}
+        uart_channel_cfg = config_uart_channel(
+            Channel=3, BitRate=9600, BitsPerFrame=9, StopBits=1.5, Parity="Even",
+            Indianess="MSB", Inversion=True, AddressMode="MP")
+        assert expected_dict == uart_channel_cfg
+
+    def test_config_uart_builds_uart_cfg_dict_alternate_parity(self):
+        expected_dict = self.base_uart_dict.copy()
+        expected_dict["Parity Bit"] = "Odd Parity Bit"
+        uart_channel_cfg = config_uart_channel(
+            Channel=2, BitRate=115200, BitsPerFrame=8, StopBits=1, Parity="Odd",
+            Indianess="LSB", Inversion=False, AddressMode="Normal")
+        assert expected_dict == uart_channel_cfg
+
+    def test_config_uart_builds_uart_cfg_dict_alternate_mode(self):
+        expected_dict = self.base_uart_dict.copy()
+        expected_dict["Mode"] = "MDB - Address indicated by MSB=1 (TX only)"
+        uart_channel_cfg = config_uart_channel(
+            Channel=2, BitRate=115200, BitsPerFrame=8, StopBits=1, Parity="None",
+            Indianess="LSB", Inversion=False, AddressMode="MDB")
+        assert expected_dict == uart_channel_cfg
+
+    def test_config_uart_builds_uart_cfg_dict_invalid_bitrate_raises_exception(self):
+        with pytest.raises(ValueError, match=r"Invalid value for BitRate. Value must be positive."):
+            config_uart_channel(
+                Channel=2, BitRate=0, BitsPerFrame=8, StopBits=1, Parity="Chocolate",
+                Indianess="MSB", Inversion=False, AddressMode="Normal")
+
+    def test_config_uart_builds_uart_cfg_dict_invalid_bits_per_fame_zero_raises_exception(self):
+        with pytest.raises(ValueError, match=r"Invalid value for Bits Per Frame. Value must be positive and less than 65."):
+            config_uart_channel(
+                Channel=2, BitRate=9600, BitsPerFrame=0, StopBits=1, Parity="Even",
+                Indianess="MSB", Inversion=False, AddressMode="Normal")
+
+    def test_config_uart_builds_uart_cfg_dict_invalid_bits_per_fame_zero_raises_exception(self):
+        with pytest.raises(ValueError, match=r"Invalid value for Bits Per Frame. Value must be positive and less than 65."):
+            config_uart_channel(
+                Channel=2, BitRate=9600, BitsPerFrame=65, StopBits=1, Parity="Even",
+                Indianess="MSB", Inversion=False, AddressMode="Normal")
+
+    def test_config_uart_builds_uart_cfg_dict_invalid_parity_raises_exception(self):
+        with pytest.raises(ValueError, match=r"Invalid value for Parity. Valied values are: None,Odd and Even."):
+            config_uart_channel(
+                Channel=2, BitRate=115200, BitsPerFrame=8, StopBits=1, Parity="Chocolate",
+                Indianess="MSB", Inversion=False, AddressMode="Normal")
+
+    def test_config_uart_builds_uart_cfg_dict_invalid_indianess_raises_exception(self):
+        with pytest.raises(ValueError, match=r"Invalid value for Indianess. Valied values are: MSB or LSB."):
+            config_uart_channel(
+                Channel=2, BitRate=115200, BitsPerFrame=8, StopBits=1, Parity="Odd",
+                Indianess="Cupcake", Inversion=False, AddressMode="Normal")
+
+    def test_config_uart_builds_uart_cfg_dict_invalid_address_mode_raises_exception(self):
+        with pytest.raises(ValueError, match=r"Invalid value for AddressMode. Valied values are: Normal or MP or MDB."):
+            config_uart_channel(
+                Channel=2, BitRate=115200, BitsPerFrame=8, StopBits=1, Parity="Odd",
+                Indianess="MSB", Inversion=False, AddressMode="Potato")
+
     @patch("Omini.robotlibraries.SaleaLogicAnalyzer.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
            return_value="mocked_ExportConfiguration")
     def test_export_to_csv_calls_api_ascii(self, mock_export_cfg):
@@ -341,21 +425,13 @@ class TestSalea(unittest.TestCase):
             my_logic.export_to_csv("/folder/to/csv/capture",
                                    "capture_name.txt", "TEST_SPI", "INVALID")
 
-    def test_sae_raw(self):
+    def test_save_raw(self):
         my_logic = LogicAnalyzer()
         mock_capture = Mock()
         my_logic.capture = mock_capture
         my_logic.save_raw("/path/to/folder", "filename")
         mock_capture.save_capture.assert_called_once_with(
             filepath='/path/to/folder/filename')
-
-    def test_glitch_filder_appends_new_filter(self):
-        my_logic = LogicAnalyzer()
-        assert len(my_logic._LogicAnalyzer__glitch_filter_list) == 0
-        my_logic.add_glitch_filter(1, 1e-05)
-        assert len(my_logic._LogicAnalyzer__glitch_filter_list) == 1
-        assert my_logic._LogicAnalyzer__glitch_filter_list[0].channel_index == 1
-        assert my_logic._LogicAnalyzer__glitch_filter_list[0].pulse_width_seconds == 0.00001
 
     @patch('saleae.automation.LogicDeviceConfiguration')
     def test_set_device_configuration_configures_glitch_filters(self, mock_device_cfg):
@@ -374,7 +450,7 @@ class TestSalea(unittest.TestCase):
         )
 
     @patch('saleae.automation.LogicDeviceConfiguration')
-    def test_set_device_configuration_configures_glitch_filters2(self, mock_device_cfg):
+    def test_set_device_configuration_configures_glitch_filters_with_str(self, mock_device_cfg):
         my_logic = LogicAnalyzer()
         my_logic.add_glitch_filter("1", "1e-05")
         my_logic.set_device_configuration(
