@@ -390,6 +390,52 @@ class TestSalea(unittest.TestCase):
                 Channel=2, BitRate=115200, BitsPerFrame=8, StopBits=1, Parity="Odd",
                 Indianess="MSB", Inversion=False, AddressMode="Potato")
 
+    def test_add_uart_analyser_adds_analyser(self):
+        uart_channel_cfg = config_uart_channel(
+            Channel=2, BitRate=115200, BitsPerFrame=8, StopBits=1, Parity="None",
+            Indianess="LSB", Inversion=False, AddressMode="Normal")
+        my_logic = LogicAnalyzer()
+        mock_uart_analyzer = Mock()
+        my_logic.capture = mock_uart_analyzer
+        my_logic.add_uart_analyser(
+            uart_channel_cfg, "TEST_UART")
+        mock_uart_analyzer.add_analyzer.assert_called_with(
+            'Async Serial', label='TEST_UART', settings=self.base_uart_dict)
+        return
+
+    def test_add_uart_analyser_adds_analyser2(self):
+        expected_dict = {"Input Channel": 3,
+                         "Bit Rate (Bits/s)": 9600,
+                         "Bits per Frame": "9 Bits per Transfer",
+                         "Stop Bits": "1.5 Stop Bits",
+                         "Parity Bit": "Even Parity Bit",
+                         "Significant Bit": "Most Significant Bit Sent First",
+                         "Signal inversion": "Inverted",
+                         "Mode": "MP - Address indicated by MSB=0"}
+        uart_channel_cfg = config_uart_channel(
+            Channel=3, BitRate=9600, BitsPerFrame=9, StopBits=1.5, Parity="Even",
+            Indianess="MSB", Inversion=True, AddressMode="MP")
+        my_logic = LogicAnalyzer()
+        mock_uart_analyzer = Mock()
+        my_logic.capture = mock_uart_analyzer
+        my_logic.add_uart_analyser(
+            uart_channel_cfg, "TEST_UART")
+        mock_uart_analyzer.add_analyzer.assert_called_with(
+            'Async Serial', label='TEST_UART', settings=expected_dict)
+
+    def test_add_uart_analyser_doesnt_add_same_label_twice(self):
+        uart_channel_cfg = config_uart_channel(
+            Channel=3, BitRate=9600, BitsPerFrame=9, StopBits=1.5, Parity="Even",
+            Indianess="MSB", Inversion=True, AddressMode="MP")
+        my_logic = LogicAnalyzer()
+        mock_uart_analyzer = Mock()
+        my_logic.capture = mock_uart_analyzer
+        my_logic.add_uart_analyser(
+            uart_channel_cfg, "TEST_UART")
+        with pytest.raises(ValueError, match=r".*Analysers must have unique labels.*"):
+            my_logic.add_uart_analyser(
+                uart_channel_cfg, "TEST_UART")
+
     @patch("Omini.robotlibraries.SaleaLogicAnalyzer.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
            return_value="mocked_ExportConfiguration")
     def test_export_to_csv_calls_api_ascii(self, mock_export_cfg):

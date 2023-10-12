@@ -113,16 +113,11 @@ class LogicAnalyzer:
             'SPI', label=label, settings=spi_settings)
         self.__save_analyser(label, spi_analyzer)
 
-    def add_uart_analyser(self, label: str) -> None:
+    def add_uart_analyser(self, uart_config, label: str) -> None:
+        self.__validate_analyser_label(label)
         uart_analyzer = self.capture.add_analyzer(
-            'Async Serial', label=label, settings={"Input Channel": 2,
-                                                   "Bit Rate (Bits/s)": 115200,
-                                                   "Bits per Frame": "8 Bits per Transfer (Standard)",
-                                                   "Stop Bits": "1 Stop Bit (Standard)",
-                                                   "Parity Bit": "No Parity Bit (Standard)",
-                                                   "Significant Bit": "Least Significant Bit Sent First (Standard)",
-                                                   "Signal inversion": "Non Inverted (Standard)",
-                                                   "Mode": "Normal"})
+            'Async Serial', label=label, settings=uart_config)
+        self.__save_analyser(label, uart_analyzer)
 
     def __save_analyser(self, label, analyzer):
         self.__validate_analyser_label(label)
