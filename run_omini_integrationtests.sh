@@ -1,3 +1,6 @@
-python3 ./Omini/tests/verify_startup.py
-python3 ./Omini/tests/verify_shutdown.py
+python3 ./Omini/tests/integration_tests/startup.py
+robot --outputdir Omini/tests/integration_tests/Temp/GPIO --report Omini_Integration_GPIO.html ./Omini/tests/integration_tests/Omini_Integration_GPIO.robot
+robot --outputdir Omini/tests/integration_tests/Temp/I2C --report Omini_Integration_I2C.html ./Omini/tests/integration_tests/Omini_Integration_I2C.robot
+robot --outputdir Omini/tests/integration_tests/Temp/SPI --report Omini_Integration_SPI.html ./Omini/tests/integration_tests/Omini_Integration_SPI.robot
+python3 ./Omini/tests/integration_tests/shutdown.py
 
