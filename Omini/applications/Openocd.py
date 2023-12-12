@@ -40,17 +40,25 @@ def launch_openocd(process_file, openocd_path, board_cfg_file_path, interface_cf
     process_manager.pretty_print_json(open_ocd_process_entry)
 
 
-def verify_openocd(open_ocd_log_path):
-    pattern = "accepting 'gdb' connection on tcp"
-    with open(open_ocd_log_path, 'r') as log:
-        file_contents = log.read()
-    found = re.search(pattern, file_contents)
-    if (found == None):
+def verify_openocd(open_ocd_log_path, wait_time=5):
+    pattern = "Listening on port \\d* for gdb connections"
+    file_contents_try1 = read_log(open_ocd_log_path)
+    found_try1 = re.search(pattern, file_contents_try1)
+    if (found_try1 == None):
+        time.sleep(wait_time)
+    file_contents_try2 = read_log(open_ocd_log_path)
+    found_try2 = re.search(pattern, file_contents_try2)
+    if (found_try2 == None):
         raise ProcessStartupError(
             "Openocd process did not started propperly ")
     else:
         return
-    return
+
+
+def read_log(log_file_path):
+    with open(log_file_path, 'r') as log:
+        file_contents = log.read()
+    return file_contents
 
 
 # Call from folder: embedded-integration-test-framework
