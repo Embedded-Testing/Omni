@@ -2,6 +2,7 @@ import os
 import unittest
 from unittest.mock import patch, ANY, MagicMock
 import shutil
+from pathlib import Path
 from ...applications.Openocd import *
 from ...process_manager.process_manager import *
 
@@ -92,6 +93,17 @@ class TestOpenocd(unittest.TestCase):
         assert (open_ocd_process_entry["port"] == 3333)
         assert (open_ocd_process_entry["pgrep_string"] == "openocd")
         os.remove(DummyProcess_file)
+
+    def test_verify_openocdLaunched_no_exception_if_openocd_started(self):
+        open_ocd_log_path = "./Omini/tests/unit_tests/openocd_test_data/OpenOCD_LOG_started.txt"
+        absolute_path = Path(open_ocd_log_path).resolve()
+        verify_openocd(absolute_path)
+
+    def test_verify_openocdLaunched_raise_exception_if_openocd_not_started(self):
+        open_ocd_log_path = "./Omini/tests/unit_tests/openocd_test_data/OpenOCD_LOG_not_started.txt"
+        absolute_path = Path(open_ocd_log_path).resolve()
+        with self.assertRaises(ProcessStartupError):
+            verify_openocd(absolute_path)
 
     @classmethod
     def teardown_class(cls):

@@ -1,0 +1,17 @@
+Open On-Chip Debugger 0.11.0
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+srst_only separate srst_nogate srst_open_drain connect_deassert_srst
+
+WARNING: interface/stlink-v2.cfg is deprecated, please switch to interface/stlink.cfg
+Warn : Interface already configured, ignoring
+Error: already specified hl_layout stlink
+Info : Listening on port 6666 for tcl connections
+Info : Listening on port 4444 for telnet connections
+Info : clock speed 2000 kHz
+Info : STLINK V2J40S0 (API v2) VID:PID 0483:3748
+Info : Target voltage: 2.920688
+Info : stm32f4x.cpu: hardware has 6 breakpoints, 4 watchpoints
+
