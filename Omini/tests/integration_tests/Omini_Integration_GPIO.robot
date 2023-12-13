@@ -8,9 +8,9 @@ Suite Setup         Firmware Start-up
 
 
 *** Variables ***
-${GPIO_INTEGRATION_TEST_ELF}        /home/erick/Desktop/GitPrjOmini/Omini/tests/integration_tests/GPIO_integration_tests/test_build/GPIO_integration_test.elf
-${GPIO_INTEGRATION_TEST_SOURCE}     /home/erick/Desktop/GitPrjOmini/Omini/tests/integration_tests/GPIO_integration_tests/test_build/GPIO_integration_test.cpp
-${GDB_LOG_PATH}                     /home/erick/Desktop/GitPrjOmini/Omini/tests/integration_tests/Temp/Gdb_GPIO.log
+${GPIO_INTEGRATION_TEST_ELF}        ${CURDIR}${/}GPIO_integration_tests${/}test_build${/}GPIO_integration_test.elf
+${GPIO_INTEGRATION_TEST_SOURCE}     ${CURDIR}${/}GPIO_integration_tests${/}test_build${/}GPIO_integration_test.cpp
+${GDB_LOG_PATH}                     ${CURDIR}${/}Temp${/}Gdb_GPIO.log
 ${DATA_OUT_OFFSET}                  5
 
 
@@ -30,6 +30,7 @@ GPIO INTEGRATION TESTS
 
 *** Keywords ***
 Firmware Start-up
+    Log    ${GDB_LOG_PATH}
     Debugger.Set Log File Path    ${GDB_LOG_PATH}
     Debugger.Start Logging
     Debugger.Connect    localhost    3333

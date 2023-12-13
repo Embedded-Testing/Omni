@@ -11,10 +11,10 @@ Suite Teardown      Close Backend Connection
 
 
 *** Variables ***
-${SPI_INTEGRATION_TEST_ELF}         /home/erick/Desktop/GitPrjOmini/Omini/tests/integration_tests/SPI_integration_tests/test_build/SPI_DataSend_Blocking_test.elf
-${SPI_INTEGRATION_TEST_SOURCE}      /home/erick/Desktop/GitPrjOmini/Omini/tests/integration_tests/SPI_integration_tests/test_build/SPI_DataSend_Blocking_test.cpp
-${CAPTURE_PATH}                     /home/erick/Desktop/GitPrjOmini/Omini/tests/integration_tests/Temp
-${GDB_LOG_PATH}                     /home/erick/Desktop/GitPrjOmini/Omini/tests/integration_tests/Temp/Gdb_SPI.log
+${SPI_INTEGRATION_TEST_ELF}         ${CURDIR}${/}SPI_integration_tests${/}test_build${/}SPI_DataSend_Blocking_test.elf
+${SPI_INTEGRATION_TEST_SOURCE}      ${CURDIR}${/}SPI_integration_tests${/}test_build${/}SPI_DataSend_Blocking_test.cpp
+${CAPTURE_PATH}                     ${CURDIR}${/}Temp
+${GDB_LOG_PATH}                     ${CURDIR}${/}Temp/Gdb_SPI.log
 
 
 *** Test Cases ***

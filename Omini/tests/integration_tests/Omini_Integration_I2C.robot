@@ -11,10 +11,10 @@ Suite Teardown      Close Backend Connection
 
 
 *** Variables ***
-${I2C_INTEGRATION_TEST_ELF}         /home/erick/Desktop/GitPrjOmini/Omini/tests/integration_tests/I2C_integration_tests/test_build/i2c_hal.elf
-${I2C_INTEGRATION_TEST_SOURCE}      /home/erick/Desktop/GitPrjOmini/Omini/tests/integration_tests/I2C_integration_tests/test_build/main.c
-${CAPTURE_PATH}                     /home/erick/Desktop/GitPrjOmini/Omini/tests/integration_tests/Temp
-${GDB_LOG_PATH}                     /home/erick/Desktop/GitPrjOmini/Omini/tests/integration_tests/Temp/Gdb_I2C.log
+${I2C_INTEGRATION_TEST_ELF}         ${CURDIR}${/}I2C_integration_tests${/}test_build${/}i2c_hal.elf
+${I2C_INTEGRATION_TEST_SOURCE}      ${CURDIR}${/}I2C_integration_tests${/}test_build${/}main.c
+${CAPTURE_PATH}                     ${CURDIR}${/}Temp
+${GDB_LOG_PATH}                     ${CURDIR}${/}Temp${/}Gdb_I2C.log
 
 
 *** Test Cases ***

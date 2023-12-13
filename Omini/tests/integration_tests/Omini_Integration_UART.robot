@@ -11,10 +11,10 @@ Suite Teardown      Close Backend Connection
 
 
 *** Variables ***
-${UART_INTEGRATION_TEST_ELF}        /home/erick/Desktop/GitPrjOmini/Omini/tests/integration_tests/UART_integration_tests/test_build/uart.elf
-${UART_INTEGRATION_TEST_SOURCE}     /home/erick/Desktop/GitPrjOmini/Omini/tests/integration_tests/UART_integration_tests/test_build/main.c
-${CAPTURE_PATH}                     /home/erick/Desktop/GitPrjOmini/Omini/tests/integration_tests/Temp
-${GDB_LOG_PATH}                     /home/erick/Desktop/GitPrjOmini/Omini/tests/integration_tests/Temp/Gdb_GPIO.log
+${UART_INTEGRATION_TEST_ELF}        ${CURDIR}${/}UART_integration_tests${/}test_build${/}uart.elf
+${UART_INTEGRATION_TEST_SOURCE}     ${CURDIR}${/}UART_integration_tests${/}test_build${/}main.c
+${CAPTURE_PATH}                     ${CURDIR}${/}Temp
+${GDB_LOG_PATH}                     ${CURDIR}${/}Temp${/}Gdb_GPIO.log
 
 
 *** Test Cases ***
