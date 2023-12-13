@@ -1,0 +1,16 @@
+name: Execute Script on Self-Hosted Runner
+
+on: [push]
+
+jobs:
+  run-script:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Execute script
+      run: |
+        chmod +x ./run_omini_unittests.sh
+        ./run_omini_unittests.sh
