@@ -1,0 +1,11 @@
+[
+    {
+        "type": "result",
+        "message": "error",
+        "payload": {
+            "pineaple": "Bad error malformed message, only for testing"
+        },
+        "token": null,
+        "stream": "stdout"
+    }
+]

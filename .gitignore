@@ -161,7 +161,9 @@ cython_debug/
 
 
 #Omini Temp Folder
+TempGDB/
 Temp/
+orig*
 
 #Vs Code Folder
 .vscode/

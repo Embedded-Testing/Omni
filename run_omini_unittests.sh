@@ -1,1 +1,0 @@
-pytest Omini/tests/unit_tests/test_* -v

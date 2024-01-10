@@ -1,0 +1,21 @@
+[
+    {
+        "type": "console",
+        "message": null,
+        "payload": "Warning: 'set logging on', an alias for the command 'set logging enabled', is deprecated.\n",
+        "stream": "stdout"
+    },
+    {
+        "type": "console",
+        "message": null,
+        "payload": "Use 'set logging enabled on'.\n\n",
+        "stream": "stdout"
+    },
+    {
+        "type": "result",
+        "message": "done",
+        "payload": null,
+        "token": null,
+        "stream": "stdout"
+    }
+]
