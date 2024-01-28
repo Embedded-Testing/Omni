@@ -1,0 +1,27 @@
+@startuml "Omni Sigrok"
+participant "Sigrok Test" as Test
+participant "Sigrok Backend" as Backend
+participant "Sigrok Cli" as Cli
+
+activate Test
+activate Backend
+Test <-> Backend : establish connection
+Test -> Backend : send measurement command
+activate Cli
+Backend -> Cli : send sigrok command
+Cli -> Backend : send done
+Backend -> Test : send done
+
+Test -> Backend : get response
+Backend -> Cli : poll command status
+Cli -> Backend : send not done
+Backend -> Test : send not done
+
+Test -> Backend : get response
+Backend -> Cli : poll command status
+Cli -> Backend : send done
+Backend -> Cli : get response
+Cli -> Backend : send response
+deactivate Cli
+Backend -> Test : send response
+@enduml

@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 
+
 class InvalidProcessEntry(Exception):
     pass
 
@@ -25,7 +26,7 @@ def create_config_file(filename):
 
 
 def delete_config_file(file_path):
-    if(load_processes(file_path) == []):
+    if (load_processes(file_path) == []):
         os.remove(file_path)
     return
 
@@ -63,32 +64,30 @@ def load_processes(config_file):
 def pretty_print_json(data):
     print(json.dumps(data, indent=4))
 
+
 def close_applications(config_file):
     verify_file(config_file)
     json_data = load_processes(config_file)
     for application in json_data:
-        pid =application["pid"]
+        pid = application["pid"]
         kill_command = ["kill", pid]
         print(kill_command)
         subprocess.run(kill_command)
-    
-    # logic_pids = subprocess.check_output(pgrep_command).decode().splitlines()
-    # print(logic_pids)
-    # for pid in logic_pids:
-    #     kill_command = ["kill", pid]
-    #     subprocess.run(kill_command)
 
 
 def verify_file(process_file):
     __verify_file_exists(process_file)
     __verify_file_format(process_file)
 
+
 def __verify_file_exists(process_file):
-    if(os.path.isfile(process_file)==False):
+    if (os.path.isfile(process_file) == False):
         raise FileNotFoundError(f"file '{process_file}' not found")
-        
+
+
 def __verify_file_format(process_file):
     with open(process_file, "r") as file:
         json_data = json.load(file)
-        if(type(json_data)!= list):
-            raise ValueError(f"file '{process_file}' has bad format expected list")
+        if (type(json_data) != list):
+            raise ValueError(
+                f"file '{process_file}' has bad format expected list")

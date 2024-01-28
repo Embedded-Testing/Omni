@@ -23,5 +23,5 @@ Openocd.launch_openocd(process_file, "/usr/bin/openocd", "/usr/share/openocd/scr
                        "/usr/share/openocd/scripts/interface/stlink-v2.cfg", openocd_log_file)
 SaleaBackend.launch_salea("/usr/local/bin/Logic",
                           salea_log_file, 10430, process_file, headless=True)
-# SaleaBackend.verify_salea_startup(salea_log_file, 20)
+SaleaBackend.verify_salea_startup(salea_log_file, 20)
 Openocd.verify_openocd(openocd_log_file)
