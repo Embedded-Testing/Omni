@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import psutil
 
 class InvalidProcessEntry(Exception):
     pass
@@ -68,15 +69,12 @@ def close_applications(config_file):
     json_data = load_processes(config_file)
     for application in json_data:
         pid =application["pid"]
-        kill_command = ["kill", pid]
-        print(kill_command)
-        subprocess.run(kill_command)
+        __terminate_process_by_pid(int(pid))
+
     
-    # logic_pids = subprocess.check_output(pgrep_command).decode().splitlines()
-    # print(logic_pids)
-    # for pid in logic_pids:
-    #     kill_command = ["kill", pid]
-    #     subprocess.run(kill_command)
+def __terminate_process_by_pid(pid:int):
+        process = psutil.Process(pid)
+        process.terminate()
 
 
 def verify_file(process_file):

@@ -105,16 +105,20 @@ class TestProcessManager(unittest.TestCase):
         self.assertTrue(os.path.isfile(file_path))
         os.remove(file_path)
 
-    @patch('subprocess.run', side_effect=None)
-    def test_manager_kills_all_applications(self, mock_subprocess_run):
+    @patch('psutil.Process')
+    def test_manager_kills_all_applications(self, mock_psutil_process):
         file_path = "Temp/my_process_cfg.json"
         create_config_file(file_path)
         append_process_data_to_file(dummy_entry1, file_path)
         append_process_data_to_file(dummy_entry2, file_path)
         close_applications(file_path)
-        expected_calls = [call.mock_subprocess_run(
-            ["kill", dummy_entry1["pid"]]), call.mock_subprocess_run(["kill", dummy_entry2["pid"]])]
-        mock_subprocess_run.assert_has_calls(expected_calls)
+        expected_process_calls = [
+            call(int(dummy_entry1["pid"])),
+            call().terminate(),
+            call(int(dummy_entry2["pid"])),
+            call().terminate()
+        ]
+        mock_psutil_process.assert_has_calls(expected_process_calls)
         os.remove(file_path)
 
     # def test_manager_verifies_if_application_closed(self,mock_subprocess_run):
