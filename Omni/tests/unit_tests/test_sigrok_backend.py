@@ -141,3 +141,14 @@ def test_sigrok_backend_answers_done_if_cmd_done(socket_mock, logging_mock, sigr
     sigrok_process(1234, log_file_path)
     client_socket.sendall.assert_called_with("done".encode())
     mock_send_cmd.assert_called_with(dummy_cmd_str)
+
+
+def test_sigrok_backend_get_response_from_cmd(socket_mock, logging_mock, sigrok_cli_mocker):
+    server_socket, client_socket = socket_mock
+    sigrok_cli_mock, mock_send_cmd = sigrok_cli_mocker
+    mock_send_cmd.return_value = {"status": "done"}
+    dummy_cmd_str = json.dumps(command_dict)
+    client_socket.recv.return_value = dummy_cmd_str.encode()
+    sigrok_process(1234, log_file_path)
+    client_socket.sendall.assert_called_with("done".encode())
+    mock_send_cmd.assert_called_with(dummy_cmd_str)
