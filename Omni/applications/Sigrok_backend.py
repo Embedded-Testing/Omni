@@ -6,7 +6,7 @@ import json
 _bufsize = 4096
 
 _error_msg_not_json = "Invalid test command. Received test command is not valid JSON."
-_error_msg_bad_dict = "Invalid test command. Received test dictionary command does not contain command key."
+_error_msg_bad_dict = "Invalid test command. Received test dictionary command does not contain type key."
 
 
 def handle_omni_connection(client_connection):
@@ -18,12 +18,15 @@ def handle_omni_connection(client_connection):
     valid_cmd = __validade_cmd(command_str, test_socket)
     if (valid_cmd == True):
         cmd_instance = Sigrok_cli.SigrokCli()
-        ret = cmd_instance.send_cmd(command_str)
-        if (ret["status"] == "done"):
-            test_socket.sendall("done".encode())
-    # Hanlde command
-    # Send command to sigrok-cli
+        ret_dict = cmd_instance.send_cmd(command_str)
+        test_socket.sendall(json.dumps(ret_dict).encode())
     test_socket.close()
+
+
+error_dict = {"type": "",
+              "payload": "",
+              "status": "error"
+              }
 
 
 def __validade_cmd(command_str, test_socket):
@@ -34,10 +37,12 @@ def __validade_cmd(command_str, test_socket):
         logging.error(error_msg)
         test_socket.sendall(error_msg.encode())
         return False
-    if not 'command' in command_dict:
+    if not 'type' in command_dict:
         error_msg = f"{_error_msg_bad_dict} Received: {command_str}"
         logging.error(error_msg)
-        test_socket.sendall(error_msg.encode())
+        error_dict["payload"] = error_msg
+        error_dict["status"] = "error"
+        test_socket.sendall(json.dumps(error_dict).encode())
         return False
     return True
 

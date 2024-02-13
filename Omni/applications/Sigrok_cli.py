@@ -1,5 +1,5 @@
 import subprocess
-
+import json
 version = """sigrok-cli 0.7.2
 
 Libraries and features:
@@ -26,16 +26,20 @@ class SigrokCli:
         pass
 
     def send_cmd(self, cmd) -> dict:
-        command_list = ['sigrok-cli', cmd]
+        cmd_dict = json.loads(cmd)
+        payload = cmd_dict["payload"]
+        command_list = ['sigrok-cli', payload]
         try:
             self.cmd_process = subprocess.Popen(
                 command_list, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            return {"status": "done"}
+            cmd_dict["status"] = "done"
+            return cmd_dict
         except Exception as e:
             exception_type = type(e).__name__
-            payload = f'{exception_type}: {e}'
-            return {'status': 'error',
-                    'payload': payload}
+            error_msg = f'{exception_type}: {e}'
+            cmd_dict["status"] = "error"
+            cmd_dict["payload"] = error_msg
+            return cmd_dict
 
     def get_response(self) -> dict:
         if self.cmd_process.poll() is None:
