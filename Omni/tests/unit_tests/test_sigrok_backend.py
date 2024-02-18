@@ -7,6 +7,8 @@ import pytest
 from unittest.mock import MagicMock
 import json
 import subprocess
+from .sigrok_data.sigrok_commands import measurement_command, malformed_dict_cmd, bad_cmd, help_command, get_response_command
+from .sigrok_data.sigrok_resp import help_rsp
 
 
 @pytest.fixture
@@ -82,7 +84,7 @@ def test_sigrok_backend_waits_for_data(socket_mock):
     dummy_cmd__str = json.dumps(command_dict)
     test_socket.recv.return_value = dummy_cmd__str.encode()
     sigrok_process(1234, log_file_path)
-    test_socket.recv.assert_called_once_with(4096)
+    test_socket.recv.assert_called_with(4096)
 
 
 get_rsp_dict = {
@@ -98,20 +100,6 @@ command_dict = {
 command_dict2 = {
     "type": "command",
     "payload": "Sigrok dummy cmd2",
-}
-
-measurement_command = {
-    "type": "command",
-    "payload": "--version",
-}
-
-bad_dict_cmd = {
-    "bad_dict": "a bad string",
-}
-
-bad_cmd = {
-    "type": "command",
-    "command": "a bad command"
 }
 
 
@@ -138,12 +126,12 @@ def test_sigrok_backend_recv_data_logs_error_on_non_json_cmd(socket_mock, loggin
 
 def test_sigrok_backend_recv_data_logs_error_on_malformed_cmd_dict(socket_mock, logging_mock):
     server_socket, test_socket = socket_mock
-    dummy_cmd__str = json.dumps(bad_dict_cmd)
+    dummy_cmd__str = json.dumps(malformed_dict_cmd)
     test_socket.recv.return_value = dummy_cmd__str.encode()
     sigrok_process(1234, log_file_path)
     logging_mock.error.assert_called_with(
         f"Invalid test command. Received test dictionary command does not contain type key. Received: {dummy_cmd__str}")
-    msg = r"""{"type": "", "payload": "Invalid test command. Received test dictionary command does not contain type key. Received: {\"bad_dict\": \"a bad string\"}", "status": "error"}"""
+    msg = r"""{"type": "", "payload": "Invalid test command. Received test dictionary command does not contain type key. Received: {\"bad_dict\": \"a malformed dict doesnt have a type key\"}", "status": "error"}"""
     test_socket.sendall.assert_called_with(msg.encode())
 
 
@@ -185,6 +173,20 @@ def test_sigrok_backend_get_response_from_cmd_with_error(socket_mock, logging_mo
         {"type": "command", "payload": "Exception: This is an error", "status": "error"}).encode()
     test_socket.sendall.assert_called_with(rsp)
 
+
+def test_sigrok_backend_sends_cmd_and_gets_rsp(socket_mock, logging_mock, sigrok_process_mocker):
+    server_socket, test_socket = socket_mock
+    cmd_str = json.dumps(help_command)
+    get_response_cmd_str = json.dumps(get_response_command)
+    test_socket.recv.side_effect = [
+        cmd_str.encode(), get_response_cmd_str.encode()]
+    sigrok_process(1234, log_file_path)
+    logging_mock.debug.assert_any_call(
+        "Received test command: " + cmd_str)
+    sigrok_process_mocker.assert_called_with(
+        ['sigrok-cli', help_command["payload"]], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    logging_mock.debug.assert_any_call(
+        "Received test command: " + get_response_cmd_str)
 
 # def test_sigrok_backend_querry_last_cmd(socket_mock, logging_mock, sigrok_process_mocker):
 #     server_socket, test_socket = socket_mock

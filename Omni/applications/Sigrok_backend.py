@@ -20,6 +20,9 @@ def handle_omni_connection(client_connection):
         cmd_instance = Sigrok_cli.SigrokCli()
         ret_dict = cmd_instance.send_cmd(command_str)
         test_socket.sendall(json.dumps(ret_dict).encode())
+    data = test_socket.recv(_bufsize)
+    command_str = data.decode('utf-8')
+    logging.debug(f"Received test command: {command_str}")
     test_socket.close()
 
 
