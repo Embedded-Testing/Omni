@@ -10,8 +10,7 @@ echo -e "${BOLD_BLUE}Activating the Python virtual environment...${RESET}"
 source venv/bin/activate
 
 echo -e "${BOLD_BLUE}Running unit tests with pytest...${RESET}"
-pytest ./Omni/tests/unit_tests/test_* -v
-
+pytest ./Omni/tests/unit_tests/test_* -v --cov=./Omni --cov-report html --cov-config=.coveragerc
 echo -e "${BOLD_GREEN}Unit tests completed successfully.${RESET}"
 
 echo -e "${BOLD_BLUE}Installing Omni package...${RESET}"
