@@ -19,12 +19,20 @@ jobs:
       run: |
         chmod +x ./02_omini_unittests.sh
         ./02_omini_unittests.sh
-  
+
+    - name: Adjust Coverage Report Paths for SonarQube
+      run: |
+          chmod +x ./0x_Ajust_Paths_for_Sonarqube.sh
+          ./0x_Ajust_Paths_for_Sonarqube.sh
+
     - name: SonarCloud scan
       uses: SonarSource/sonarcloud-github-action@master
       env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        args: >
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
     - name: Start Host Applications
       run: |
@@ -54,13 +62,3 @@ jobs:
         name: test-artifacts
         path: ./Omni/tests/integration_tests/Temp
 
-    - name: Archive Coverage Report
-    #Not possible to push coverage report to SonarCloud. 
-    #Solution is to upload the coverage report as an artifact. 
-    #Once bug is solved in SonarCloud, this step can be removed.
-    #Ref: https://community.sonarsource.com/t/sonarcloud-github-action-coverage-report/37210
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-coverage-reports
-        path: ./htmlcov
