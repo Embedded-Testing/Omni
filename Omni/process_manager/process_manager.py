@@ -3,6 +3,7 @@ import os
 import subprocess
 import psutil
 
+
 class InvalidProcessEntry(Exception):
     pass
 
@@ -26,7 +27,7 @@ def create_config_file(filename):
 
 
 def delete_config_file(file_path):
-    if(load_processes(file_path) == []):
+    if (load_processes(file_path) == []):
         os.remove(file_path)
     return
 
@@ -64,29 +65,33 @@ def load_processes(config_file):
 def pretty_print_json(data):
     print(json.dumps(data, indent=4))
 
+
 def close_applications(config_file):
     verify_file(config_file)
     json_data = load_processes(config_file)
     for application in json_data:
-        pid =application["pid"]
+        pid = application["pid"]
         __terminate_process_by_pid(int(pid))
 
-    
-def __terminate_process_by_pid(pid:int):
-        process = psutil.Process(pid)
-        process.terminate()
+
+def __terminate_process_by_pid(pid: int):
+    process = psutil.Process(pid)
+    process.terminate()
 
 
 def verify_file(process_file):
     __verify_file_exists(process_file)
     __verify_file_format(process_file)
 
+
 def __verify_file_exists(process_file):
-    if(os.path.isfile(process_file)==False):
+    if (os.path.isfile(process_file) == False):
         raise FileNotFoundError(f"file '{process_file}' not found")
-        
+
+
 def __verify_file_format(process_file):
     with open(process_file, "r") as file:
         json_data = json.load(file)
-        if(type(json_data)!= list):
-            raise ValueError(f"file '{process_file}' has bad format expected list")
+        if not isinstance(json_data, list):
+            raise ValueError(
+                f"file '{process_file}' has bad format expected list")
