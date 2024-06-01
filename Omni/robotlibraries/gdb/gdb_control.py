@@ -1,11 +1,15 @@
 import subprocess
-from pygdbmi.gdbcontroller import *
-from pygdbmi.constants import *
+from pygdbmi.gdbcontroller import GdbController
+from pygdbmi.constants import GdbTimeoutError
 import re
 import os
 import json
-from .source_utility import *
+from .source_utility import line_of_test_tag, TagNotFoundError, TagError
 import linecache
+
+
+OPEN_OCD = "Open On-Chip Debugger"
+SEGGER_JLINK = "SEGGER J-Link GDB Server"
 
 
 class GdbResponseError(Exception):
@@ -154,16 +158,16 @@ class gdb:
     def __get_server_type(self):
         response_list = self.gdb_controller.write("monitor version")
         if (self.__is_server_open_ocd(response_list) == True):
-            return "Open On-Chip Debugger"
+            return OPEN_OCD
         else:
             response_list = self.gdb_controller.write("monitor help")
             rsp = response_list[1]["payload"]
-            if ("SEGGER J-Link GDB Server" in rsp):
-                return "SEGGER J-Link GDB Server"
+            if (SEGGER_JLINK in rsp):
+                return SEGGER_JLINK
 
     def __is_server_open_ocd(self, response_list):
         rsp = response_list[1]
-        if ("Open On-Chip Debugger" in rsp["payload"]):
+        if (OPEN_OCD in rsp["payload"]):
             return True
         else:
             return False
@@ -213,9 +217,9 @@ class gdb:
                                   "Please connect to a GDBserver or OpenOCD for proper functioning.")
 
     def __verify_server_type_for_reset_halt(self):
-        if (self.server == "Open On-Chip Debugger"):
+        if (self.server == OPEN_OCD):
             return
-        elif (self.server == "SEGGER J-Link GDB Server"):
+        elif (self.server == SEGGER_JLINK):
             raise NotImplementedError(
                 "monitor reset halt not implemented for SEGGER J-Link GDB Server")
         else:
