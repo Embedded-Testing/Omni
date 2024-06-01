@@ -1,2 +1,10 @@
 [run]
-omit = */__init__.py,**/tests/**
+branch = True
+source = 
+    Omni/applications
+    Omni/process_manager
+    Omni/robotlibraries
+omit = 
+    */__init__.py
+    **/tests/**
+relative_files = False

@@ -10,13 +10,13 @@ echo -e "${BOLD_BLUE}Activating the Python virtual environment...${RESET}"
 source venv/bin/activate
 
 echo -e "${BOLD_BLUE}Running unit tests with pytest...${RESET}"
-pytest ./Omni/tests/unit_tests/test_* -v --cov=./Omni --cov-report html --cov-config=.coveragerc
+pytest ./Omni/tests/unit_tests/test_* -v --cov=./Omni --cov-report xml --cov-report html --cov-config=.coveragerc --junitxml=pytest.xml
+
 echo -e "${BOLD_GREEN}Unit tests completed successfully.${RESET}"
 
 echo -e "${BOLD_BLUE}Installing Omni package...${RESET}"
 python3 setup.py sdist
 pip install dist/Omni-0.0.1.tar.gz
 echo -e "${BOLD_GREEN}Omni package installed.${RESET}"
-
 
 

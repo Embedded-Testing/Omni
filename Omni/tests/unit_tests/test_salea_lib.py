@@ -188,6 +188,56 @@ class TestSalea(unittest.TestCase):
             my_logic.add_spi_analyser(
                 spi_channels_cfg, spi_protocol_cfg, "TEST_SPI")
 
+    def test_invalid_EnableLineActive_raises_exception(self):
+        my_logic = LogicAnalyzer()
+        mock_spi_analyzer = Mock()
+        my_logic.capture = mock_spi_analyzer
+        spi_channels_cfg = config_spi_channels(
+            MISO=1, MOSI=2, Enable=3, Clock=4)
+        with pytest.raises(SaleaConfigurationError, match=r"Invalid value for 'EnableLineActive'. Provided value: '2'. Valid values are: 0, 1."):
+            spi_protocol_cfg = config_spi_protocol(
+                DATA_FRAME_SIZE=8, FIRST_BIT='MSB', CPHA=0, CPOL=0, EnableLineActiveOn=2)
+
+    def test_invalid_DATA_FRAME_SIZE_raises_exception(self):
+        my_logic = LogicAnalyzer()
+        mock_spi_analyzer = Mock()
+        my_logic.capture = mock_spi_analyzer
+        spi_channels_cfg = config_spi_channels(
+            MISO=1, MOSI=2, Enable=3, Clock=4)
+        with pytest.raises(SaleaConfigurationError, match=r"Invalid value for 'DATA_FRAME_SIZE'. Provided value: '55'. Valid values are: 8, 16."):
+            spi_protocol_cfg = config_spi_protocol(
+                DATA_FRAME_SIZE=55, FIRST_BIT='MSB', CPHA=0, CPOL=0, EnableLineActiveOn=0)
+
+    def test_invalid_FIRST_BIT_raises_exception(self):
+        my_logic = LogicAnalyzer()
+        mock_spi_analyzer = Mock()
+        my_logic.capture = mock_spi_analyzer
+        spi_channels_cfg = config_spi_channels(
+            MISO=1, MOSI=2, Enable=3, Clock=4)
+        with pytest.raises(SaleaConfigurationError, match=r"Invalid value for 'FIRST_BIT'. Provided value: 'ABC'. Valid values are: MSB, LSB."):
+            spi_protocol_cfg = config_spi_protocol(
+                DATA_FRAME_SIZE=8, FIRST_BIT='ABC', CPHA=0, CPOL=0, EnableLineActiveOn=0)
+
+    def test_invalid_CPHA_raises_exception(self):
+        my_logic = LogicAnalyzer()
+        mock_spi_analyzer = Mock()
+        my_logic.capture = mock_spi_analyzer
+        spi_channels_cfg = config_spi_channels(
+            MISO=1, MOSI=2, Enable=3, Clock=4)
+        with pytest.raises(SaleaConfigurationError, match=r"Invalid value for 'CPHA'. Provided value: '22'. Valid values are: 0, 1."):
+            spi_protocol_cfg = config_spi_protocol(
+                DATA_FRAME_SIZE=8, FIRST_BIT='LSB', CPHA=22, CPOL=0, EnableLineActiveOn=0)
+
+    def test_invalid_CPOL_raises_exception(self):
+        my_logic = LogicAnalyzer()
+        mock_spi_analyzer = Mock()
+        my_logic.capture = mock_spi_analyzer
+        spi_channels_cfg = config_spi_channels(
+            MISO=1, MOSI=2, Enable=3, Clock=4)
+        with pytest.raises(SaleaConfigurationError, match=r"Invalid value for 'CPOL'. Provided value: '33'. Valid values are: 0, 1."):
+            spi_protocol_cfg = config_spi_protocol(
+                DATA_FRAME_SIZE=8, FIRST_BIT='LSB', CPHA=0, CPOL=33, EnableLineActiveOn=0)
+
     @patch("Omni.robotlibraries.SaleaLogicAnalyzer.SaleaLogicAnalyzer.automation.capture.DataTableExportConfiguration",
            return_value="mocked_ExportConfiguration")
     def test_export_to_csv_calls_api_with_spi_analyser(self, mock_export_cfg):

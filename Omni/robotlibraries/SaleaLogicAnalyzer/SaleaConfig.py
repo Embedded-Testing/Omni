@@ -1,3 +1,6 @@
+from . import SaleaLogicAnalyzer
+
+
 def config_uart_channel(Channel: int, BitRate: int, BitsPerFrame: int, StopBits: float,
                         Parity: str, Indianess: str, Inversion: bool, AddressMode: str) -> dict:
     __verify_bitrate(BitRate)
@@ -130,34 +133,46 @@ def __extract_active_line(EnableLineActiveOn: str, protocol_dict: dict):
     if (EnableLineActiveOn == '0' or EnableLineActiveOn == '1'):
         protocol_dict["EnableLineActive"] = str(EnableLineActiveOn)
     else:
-        raise Exception("EnableLineActive value " +
-                        EnableLineActiveOn+" not valid")
+        raise SaleaLogicAnalyzer.SaleaConfigurationError(__form_not_valid_msg(
+            "EnableLineActive", EnableLineActiveOn, ['0', '1']))
 
 
 def __extract_phase(CPHA: str, protocol_dict: dict):
     if (CPHA == '0' or CPHA == '1'):
         protocol_dict["CPHA"] = str(CPHA)
     else:
-        raise Exception("CPHA value "+CPHA+" not valid")
+        raise SaleaLogicAnalyzer.SaleaConfigurationError(
+            __form_not_valid_msg("CPHA", CPHA, ['0', '1']))
 
 
 def __extract_polarity(CPOL: str, protocol_dict: dict):
     if (CPOL == '0' or CPOL == '1'):
         protocol_dict["CPOL"] = str(CPOL)
     else:
-        raise Exception("CPOL value "+CPOL+" not valid")
+        raise SaleaLogicAnalyzer.SaleaConfigurationError(
+            __form_not_valid_msg("CPOL", CPOL, ['0', '1']))
 
 
 def __extract_first_bit_type(FIRST_BIT: str, protocol_dict: dict):
     if (FIRST_BIT == 'MSB' or FIRST_BIT == 'LSB'):
         protocol_dict["FIRST_BIT"] = str(FIRST_BIT)
     else:
-        raise Exception("FIRST_BIT value "+FIRST_BIT+" not valid")
+        raise SaleaLogicAnalyzer.SaleaConfigurationError(
+            __form_not_valid_msg("FIRST_BIT", FIRST_BIT, ['MSB', 'LSB']))
 
 
 def __extract_frame_size(DATA_FRAME_SIZE: str, protocol_dict: dict):
     if (DATA_FRAME_SIZE == '8' or DATA_FRAME_SIZE == '16'):
         protocol_dict["DATA_FRAME_SIZE"] = str(DATA_FRAME_SIZE)
     else:
-        raise Exception("DATA_FRAME_SIZE value " +
-                        DATA_FRAME_SIZE+" not valid")
+        raise SaleaLogicAnalyzer.SaleaConfigurationError(__form_not_valid_msg(
+            "DATA_FRAME_SIZE", DATA_FRAME_SIZE, ['8', '16']))
+
+
+def __form_not_valid_msg(parameter, val, valid_values: list):
+    valid_values_str = ', '.join(map(str, valid_values))
+    exception_msg = (
+        f"Invalid value for '{parameter}'. "
+        f"Provided value: '{val}'. Valid values are: {valid_values_str}."
+    )
+    return exception_msg

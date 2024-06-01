@@ -25,9 +25,9 @@ class LogicAnalyzer:
         try:
             self.manager = automation.Manager.connect(
                 port=port, address=address, connect_timeout_seconds=timeout_seconds)
-        except:
+        except Exception as e:
             raise SaleaConnectionTimeout(
-                f"Unable to connect to Salea application. Verify connection on {address}:{port}")
+                f"Unable to connect to Salea application. Verify connection on {address}:{port}") from e
 
     def set_device_configuration(self, enabled_digital_chanels=None,
                                  digital_sample_rate=None,
